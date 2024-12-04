@@ -1,0 +1,59 @@
+{% load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+</head>
+<body>
+
+
+<div class="mt-5">
+    <h4>Add Scheduled Payment</h4>
+    <form method="post" action="{% url 'add_scheduled_payment' %}">
+        {% csrf_token %}
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="title" placeholder="Payment Title" required>
+            </div>
+            <div class="col-md-6">
+                <input type="text" class="form-control" name="recipient" placeholder="Recipient" required>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="number" class="form-control" name="amount" placeholder="Amount" required>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select" name="category" required>
+                    <option value="" disabled selected>Category</option>
+                    <option value="Rent">Rent</option>
+                    <option value="Utilities">Utilities</option>
+                    <option value="Subscriptions">Subscriptions</option>
+                    <option value="Groceries">Groceries</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <input type="date" class="form-control" name="next_payment_date" required>
+            </div>
+            <div class="col-md-6">
+                <select class="form-select" name="frequency" required>
+                    <option value="" disabled selected>Frequency</option>
+                    <option value="Daily">Daily</option>
+                    <option value="Weekly">Weekly</option>
+                    <option value="Monthly">Monthly</option>
+                    <option value="Yearly">Yearly</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Scheduled Payment</button>
+    </form>
+</div>
+</body>
+</html>

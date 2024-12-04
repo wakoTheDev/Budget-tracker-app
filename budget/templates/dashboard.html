@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <style>
+        .content-section {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        .card-body { padding: 2rem; }
+        .progress { height: 20px; }
+        .items{
+            margin-right:10px;
+            padding:10px;
+            border-radius:4px;
+        }
+        .items:hover{
+            background-color:grey;
+            cursor:pointer;
+        }
+        .hidden {
+            display: none;
+          }
+    </style>
+</head>
+<body>
+
+    <!-- Top Header Section -->
+    <header class="bg-light py-3">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-smile fa-2x"></i>
+                <h3 class="ml-3">Dashboard</h3>
+            </div>
+            <div>
+                <input type="text" class="form-control" placeholder="Search for...">
+                <button class="btn btn-primary ml-2" style="margin:5px 0px ;">Generate Report</button>
+                <button class="btn btn-primary ml-2" style="margin:5px 0px ;" onclick="logout">logout</button>
+            </div>
+        </div>
+    </header>
+    <section class='main' style="display:flex; ">
+        <section style="width:20%;">
+            <nav style="float:left; height:100vh; padding:10px;">
+                <ul id="menu" style="list-style:none;">
+                    <li data-page="home" class="items">home</li>
+                    <li data-page="profile" class="items">profile</li>
+                    <li data-page="account" class="items">Account</li>
+                    <li data-page="budget" class="items">Budgeting</li>
+                    <li data-page="schedule" class="items">schedule</li>
+                    <li data-page="wallet" class="items">Wallet</li>
+                </ul>
+            </nav>
+        </section>
+        <section style="width:80%;">
+            <!-- Middle Section (Main Content) -->
+    <main class="container mt-4" id="content">
+        
+    </main>
+        </section>
+
+    </section>
+    <!-- Bottom Footer Section -->
+    <footer class="bg-dark text-white py-3">
+        <div class="container text-center">
+            <p>Copyright &copy; Your Website 2021</p>
+        </div>
+    </footer>
+    <script>
+              const contentData = {
+                home:``,
+                profile:``,                  
+                Account:``,                   
+                Budget:``,
+                schedule:``,
+                Wallet:``,
+
+         }
+
+         const menuItems = document.querySelectorAll("#menu li");
+         const contentDiv = document.getElementById("content");
+ 
+         menuItems.forEach(item => {
+             item.addEventListener("click", () => {
+                 const page = item.getAttribute("data-page");
+                 console.log("menu item clickked")
+                 fetch(`/get_content/${page}/`)
+                     .then(response => response.text())
+                     .then(data => {
+                         contentDiv.innerHTML = data;
+                     })
+                     .catch(error => {
+                         contentDiv.innerHTML = "<p>Sorry, there was an error loading the content.</p>";
+                     });
+             });
+         });
+
+          // Get all navigation links and content sections
+    const navLinks = document.querySelectorAll('ul a');
+    const sections = document.querySelectorAll('.content-section');
+
+    // Add event listeners to navigation links
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();  
+
+            // Hide all sections
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Show the clicked section
+            const targetSection = document.getElementById(link.getAttribute('data-target'));
+            targetSection.classList.add('active');
+        });
+    })
+                
+
+    </script>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
