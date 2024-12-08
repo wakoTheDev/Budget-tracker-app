@@ -3,8 +3,13 @@ import bcrypt
 from django.contrib import messages
 from django.contrib import auth
 from .models import *
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt,csrf_protect
+from django.views.decorators.http import require_http_methods
 import logging
-from django.http import HttpResponse
+import json
+from datetime import datetime, timedelta
+from django.http import HttpResponse,JsonResponse
 from django.template.loader import render_to_string
 
 logger = logging.getLogger('my_custom_logger')
@@ -76,6 +81,7 @@ def logout(request):
         logger.info(f"Logging out user: {request.user.username}")
         auth.logout(request)
         messages.info(request, "logged out successfully.")
+        return redirect("/")
     else:
         logger.info("Logout attempt by an anonymous user.")
     return redirect('login')  
@@ -88,7 +94,7 @@ def get_content(request, page):
     elif page == "profile":
         content = render_to_string("profile.html")
     elif page == "account":
-        content = render_to_string("account.html")
+        content = render_to_string("accounts.html")
     elif page == "budget":
         content = render_to_string("budget.html")
     elif page == "schedule":
@@ -99,51 +105,166 @@ def get_content(request, page):
         content = render_to_string('home.html')
 
     return HttpResponse(content)
+def back_to_schedule(requst):
+    return HttpResponse(render_to_string("schedule.html"))
+
+def get_nav_content(request, page):
+    if page == "monthly":
+        content = render_to_string("monthly.html")
+    elif page == "weekly":
+        content = render_to_string("weekly.html")
+    elif page == "daily":
+        content = render_to_string("daily.html")
+    else:
+        content = render_to_string("annually.html")
+    return HttpResponse(content)
 
 
 def user_dashboard(request):
     return render(request,'dashboard.html',{})
 
-def add_transaction(request):
+def limit_form(request):
+    return render(request, 'limits.html')
+
+def set_account_limits(request):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        limit = request.POST.get('limit')
+        account_name = request.POST.get('account_name')
+        account_number = request.POST.get('account_number')
+        
+        Limits.objects.create(limit=limit,account_name=account_name,account_number=account_number)
+                
+        # Return a JSON response
+        account_name = request.POST.get('account_name')
+        return JsonResponse({'message': 'Limit saved successfully!', 'limit': limit, 'account_name':account_name }, status=200)
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def scheduler(request):
+    return render(request,'payment_scheduler.html')
+@csrf_exempt
+def add_payment_schedule(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            schedule = PaymentSchedule.objects.create(
+                scheduled_date = data['date'],
+                amount = data['amount'],
+                recurrence = data.get('recurrence',''),
+                description = data.get('description','')
+            )
+            response_data = {
+            'success': True,
+            'schedule': {
+                'date': data['date'],
+                'amount': data['amount'],
+                'recurrence': data['recurrence'],
+                'description': data['description'],
+            }
+        }
+            return JsonResponse(response_data)
+        except Exception as e:
+            return JsonResponse({'success':False,'error':str(e)})
+
+@require_http_methods(["DELETE"])
+@csrf_exempt
+def delete_schedule(request, schedule_id):
+    try:
+        schedule = get_object_or_404(PaymentSchedule, id=schedule_id)
+        schedule.delete()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@require_http_methods(["PATCH"])
+@csrf_exempt
+def update_schedule(request, schedule_id):
+    try:
+        data = json.loads(request.body)
+        schedule = get_object_or_404(PaymentSchedule, id=schedule_id)
+        
+        if 'date' in data:
+            schedule.scheduled_date = data['date']
+        if 'recurrence' in data:
+            schedule.recurrence = data['recurrence']
+        if 'description' in data:
+            schedule.description = data['description']
+        
+        schedule.save()
+        return JsonResponse({
+            'success': True, 
+            'schedule': schedule.to_dict()
+        })
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+    
+    
+    
+def fetch_earnings(request):
     pass
 
-# from django.shortcuts import render, redirect
-# from django.utils.timezone import now
-# from .models import ScheduledExpenditure, AutomatedPayment
 
-# def dashboard(request):
-#     scheduled_payments = ScheduledExpenditure.objects.filter(user=request.user)
-#     return render(request, 'dashboard.html', {'scheduled_payments': scheduled_payments})
 
-# def add_scheduled_payment(request):
-#     if request.method == 'POST':
-#         ScheduledExpenditure.objects.create(
-#             user=request.user,
-#             title=request.POST['title'],
-#             amount=request.POST['amount'],
-#             recipient=request.POST['recipient'],
-#             category=request.POST['category'],
-#             frequency=request.POST['frequency'],
-#             next_payment_date=request.POST['next_payment_date']
-#         )
-#         return redirect('dashboard')
-#     return render(request, 'add_scheduled_payment.html')
+@require_http_methods(["GET"])
+def get_schedules(request):
+    schedules = PaymentSchedule.objects.all()
+    return JsonResponse({
+        'schedules': [schedule.to_dict() for schedule in schedules]
+    })
 
-# def authorize_payment(request, payment_id):
-#     payment = ScheduledExpenditure.objects.get(id=payment_id, user=request.user)
-#     AutomatedPayment.objects.create(
-#         scheduled_expenditure=payment,
-#         status='Authorized',
-#         executed_at=now()
-#     )
-#     payment.update_next_payment()
-#     return redirect('dashboard')
 
-# def decline_payment(request, payment_id):
-#     payment = ScheduledExpenditure.objects.get(id=payment_id, user=request.user)
-#     AutomatedPayment.objects.create(
-#         scheduled_expenditure=payment,
-#         status='Declined',
-#     )
-#     return redirect('dashboard')
+@csrf_exempt
+@require_http_methods(["POST"])
+def get_upcoming_schedules(request):
+    try:
+        # Parse request body
+        body = json.loads(request.body)
+        start_date = body.get('start_date', datetime.date.today())
+        end_date = body.get('end_date', (datetime.today() + timedelta(days=30)).date())
+        
+        # Ensure start_date and end_date are datetime objects
+        if isinstance(start_date, str):
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
 
+        # Fetch schedules within the next 30 days
+        schedules = PaymentSchedule.objects.filter(
+            date__gte=start_date,
+            date__lte=end_date
+        ).order_by('sceduled_date')
+
+        # Prepare schedule data
+        schedule_list = [{
+            'id': schedule.id,
+            'description': schedule.description,
+            'date': schedule.scheduled_date.isoformat()
+        } for schedule in schedules]
+
+        return JsonResponse({
+            'schedules': schedule_list,
+            'count': len(schedule_list)
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+def create_revenue_visualization(request):
+    pass
+
+def create_annual_schedule(request):
+    pass
+def create_weekly_schedule(request):
+    pass
+def create_daily_schedule(request):
+    pass
+def create_monthly_schedule(request):
+    pass
+
+def profile(request):
+    pass
+
+def accounts(request):
+    pass

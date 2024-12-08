@@ -1,0 +1,156 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Payment Form</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+            padding-top: 50px;
+        }
+        .payment-form {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="payment-form">
+                    <h2 class="text-center mb-4">Schedule Automatic Payment</h2>
+                    <form id="scheduledPaymentForm">
+                        <!-- Connected Account -->
+                        <div class="form-group">
+                            <label for="connectedAccount" class="form-label">Connected Account</label>
+                            <select class="form-select" id="connectedAccount" name="connectedAccount" required>
+                                <option value="">Select Account</option>
+                                <option value="checking">Checking Account</option>
+                                <option value="savings">Savings Account</option>
+                                <option value="credit">Credit Card</option>
+                            </select>
+                        </div>
+
+                        <!-- Payment Date and Time -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="paymentDate" class="form-label">Payment Date</label>
+                                <input type="date" class="form-control" id="paymentDate" name="paymentDate" required>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="paymentTime" class="form-label">Payment Time</label>
+                                <input type="time" class="form-control" id="paymentTime" name="paymentTime">
+                            </div>
+                        </div>
+
+                        <!-- Reason and Amount -->
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label for="reason" class="form-label">Reason</label>
+                                <input type="text" class="form-control" id="reason" name="reason" placeholder="e.g., Rent, Utilities">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label for="amount" class="form-label">Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="amount" name="amount" min="0" step="0.01" placeholder="0.00" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recipient Details -->
+                        <div class="form-group">
+                            <label for="recipient" class="form-label">Recipient Name</label>
+                            <input type="text" class="form-control" id="recipient" name="recipient" placeholder="Recipient's Full Name" required>
+                        </div>
+
+                        <!-- Payment Method -->
+                        <div class="form-group">
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-select" id="paymentMethod" name="paymentMethod">
+                                <option value="account">Bank Account</option>
+                                <option value="phone">Phone Number</option>
+                            </select>
+                        </div>
+
+                        <!-- Recipient Account/Phone Details -->
+                        <div class="form-group">
+                            <label id="recipientDetailsLabel" for="recipientDetails" class="form-label">Recipient Bank Account Number</label>
+                            <input type="text" class="form-control" id="recipientDetails" name="recipientDetails" placeholder="Enter bank account number" required>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Schedule Payment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Dynamic label and input type based on payment method
+        document.getElementById('paymentMethod').addEventListener('change', function() {
+            const recipientDetailsLabel = document.getElementById('recipientDetailsLabel');
+            const recipientDetailsInput = document.getElementById('recipientDetails');
+            
+            if (this.value === 'account') {
+                recipientDetailsLabel.textContent = 'Recipient Bank Account Number';
+                recipientDetailsInput.type = 'text';
+                recipientDetailsInput.placeholder = 'Enter bank account number';
+            } else {
+                recipientDetailsLabel.textContent = 'Recipient Phone Number';
+                recipientDetailsInput.type = 'tel';
+                recipientDetailsInput.placeholder = 'Enter phone number';
+            }
+        });
+
+        // Form submission handler
+        document.getElementById('scheduledPaymentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Basic form validation
+            const requiredFields = ['connectedAccount', 'paymentDate', 'amount', 'recipient', 'recipientDetails'];
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            if (isValid) {
+                // Collect form data
+                const formData = new FormData(e.target);
+                const formObject = Object.fromEntries(formData.entries());
+                
+                // Log or send data (replace with actual submission logic)
+                console.log('Scheduled Payment:', formObject);
+                
+                // Show success message
+                alert('Payment scheduled successfully!');
+                e.target.reset();
+            }
+        });
+    </script>
+</body>
+</html>

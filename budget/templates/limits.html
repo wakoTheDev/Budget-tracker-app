@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <title>Set Expenditure</title>
+  <style>
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background-color: white;
+      padding: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      width: 300px;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+    .modal.active, .modal-overlay.active {
+      display: block;
+    }
+    .modal.active::-webkit-scrollbar{
+        display:none;
+    }
+  </style>
+  <script>
+    async function submitExpenditureForm(event) {
+      event.preventDefault(); 
+      const form = event.target;
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest', 
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          alert('Expenditure set successfully: ' + JSON.stringify(data));
+          closeModal();
+        } else {
+          alert('Error: ' + response.statusText);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to submit form.');
+      }
+    }
+
+    function openModal() {
+      document.getElementById('modalForm').classList.add('active');
+      document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('modalForm').classList.remove('active');
+      document.getElementById('modalOverlay').classList.remove('active');
+    }
+  </script>
+</head>
+<body>
+  <div class="d-flex align-content-center justify-content" style="width:50%;">
+    <button class="btn btn-success" onclick="openModal()">Set Limit</button>
+  <form action="{% url 'back_to_schedule'%}" style="margin-left:15px">
+    <button class="btn btn-danger">Exit</button>
+  </form>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay " id="modalOverlay" onclick="closeModal()"></div>
+  <div class="modal container" id="modalForm" style="width:400px; height:400px">
+    <form id="expenditureForm" class="form-control" action="{% url 'set_account_limits' %}" method="POST" onsubmit="submitExpenditureForm(event)" style="padding:20px; ">
+      {% csrf_token %}
+      <label   for="limit">Set Limit:</label>
+      <input class="form-control"  type="number" id="limit" name="limit" required>
+      <br>
+      <label   for="accounts">account name :</label>
+      <input  class="form-control" type="text" id="accounts" name="account_name" required>
+      <br>
+      <br>
+      <label for="accounts">account number :</label>
+      <input class="form-control"  type="text" id="accounts" name="account_number" required>
+      <br>
+      <button   type="submit" class="btn btn-success">Submit</button>
+      <button  type="button" class="btn btn-danger" onclick="closeModal()">Close</button>
+    </form> 
+  </div>
+</body>
+</html>

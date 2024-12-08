@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wallet Management System</title>
+    <!-- Bootstrap CSS -->
+    <link href="{%static 'assets/css/bootstrap.min.css'%}" rel="stylesheet">
+    <style>
+        .wallet-card {
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .wallet-card:hover {
+            transform: scale(1.05);
+        }
+        .blur-balance {
+            filter: blur(10px);
+            user-select: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">My Accounts</h2>
+        
+        <div id="walletsContainer" class="row">
+            <!-- Wallets will be dynamically loaded here -->
+             <button class="btn btn-sucess">refresh</button>
+        </div>
+
+        <!-- Wallet Details Modal -->
+        <div class="modal fade" id="walletDetailsModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Wallet Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="card">
+                            <div class="card-header" id="walletTypeHeader"></div>
+                            <div class="card-body">
+                                <h5 class="card-title" id="walletUsername"></h5>
+                                <div id="balanceSection" class="mt-3">
+                                    <form id="secretKeyForm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Enter Secret Key to View Balance</label>
+                                            <input type="password" class="form-control" id="secretKeyInput" required>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Unlock Balance</button>
+                                    </form>
+                                    <div id="balanceDisplay" class="mt-3" style="display:none;">
+                                        <h4>Balance: <span id="balanceAmount" class="blur-balance">*****</span></h4>
+                                        <small class="text-muted">Balance is protected. Secret key required.</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Wallet Details</h6>
+                                    <p id="walletDetails"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="{%static 'assets/js/bootstrap.bundle.min.js'%}"></script>
+
+    <script src="{%static 'js/accounts.js'%}"></script>
+</body>
+</html>

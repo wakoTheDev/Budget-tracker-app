@@ -1,14 +1,28 @@
+{%load static%}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+    <link href="{%static 'assets/css/bootstrap.min.css'%}" rel="stylesheet">
+    <link href="{% static 'assets/css/all.min.css'%}" rel="stylesheet">
     <style>
         .content-section {
             display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        nav a {
+            
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1.2em;
+            font-weight:bold;
         }
         .active {
             display: block;
@@ -17,8 +31,9 @@
         .progress { height: 20px; }
         .items{
             margin-right:10px;
-            padding:10px;
+            padding:5px;
             border-radius:4px;
+            font-weight:bold;
         }
         .items:hover{
             background-color:grey;
@@ -35,13 +50,15 @@
     <header class="bg-light py-3">
         <div class="container d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <i class="fas fa-smile fa-2x"></i>
                 <h3 class="ml-3">Dashboard</h3>
             </div>
-            <div>
+            <div class="d-flex">
                 <input type="text" class="form-control" placeholder="Search for...">
-                <button class="btn btn-primary ml-2" style="margin:5px 0px ;">Generate Report</button>
-                <button class="btn btn-primary ml-2" style="margin:5px 0px ;" onclick="logout">logout</button>
+                <button class="btn btn-primary ml-2" style="margin:5px 0px ; ">Report</button>
+                <form action="{% url 'logout'%}" method="post">
+                    {% csrf_token %}
+                <button class="btn btn-primary ml-2" style="margin:5px 0px ;" type="submit">logout</button>
+                </form>
             </div>
         </div>
     </header>
@@ -59,8 +76,66 @@
             </nav>
         </section>
         <section style="width:80%;">
-            <!-- Middle Section (Main Content) -->
+            <!-- Middle Section  -->
     <main class="container mt-4" id="content">
+        <div class="row">
+            <!-- Earnings Cards -->
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Earnings (Monthly)</h5>
+                        <p class="card-text">$40,000</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Earnings (Annual)</h5>
+                        <p class="card-text">$215,000</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Tasks</h5>
+                        <p class="card-text">50%</p>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 50%;" role="progressbar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Project Progress -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Projects</h5>
+                        <ul>
+                            <li>Server Migration - 20%</li>
+                            <li>Sales Tracking - 40%</li>
+                            <li>Customer Database - 60%</li>
+                            <li>Payout Details - 80%</li>
+                            <li>Account Setup - 100%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Revenue Sources</h5>
+                        <div class="d-flex justify-content-center">
+                            <div class="pie-chart" style="width: 150px; height: 150px; border-radius: 50%; background-color: #4e73df;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         
     </main>
         </section>
@@ -69,63 +144,133 @@
     <!-- Bottom Footer Section -->
     <footer class="bg-dark text-white py-3">
         <div class="container text-center">
-            <p>Copyright &copy; Your Website 2021</p>
+            <p>Copyright &copy; budgettrackapp.com 2024</p>
         </div>
     </footer>
     <script>
-              const contentData = {
-                home:``,
-                profile:``,                  
-                Account:``,                   
-                Budget:``,
-                schedule:``,
-                Wallet:``,
 
-         }
-
-         const menuItems = document.querySelectorAll("#menu li");
-         const contentDiv = document.getElementById("content");
- 
-         menuItems.forEach(item => {
-             item.addEventListener("click", () => {
-                 const page = item.getAttribute("data-page");
-                 console.log("menu item clickked")
-                 fetch(`/get_content/${page}/`)
-                     .then(response => response.text())
-                     .then(data => {
-                         contentDiv.innerHTML = data;
-                     })
-                     .catch(error => {
-                         contentDiv.innerHTML = "<p>Sorry, there was an error loading the content.</p>";
-                     });
-             });
-         });
-
-          // Get all navigation links and content sections
-    const navLinks = document.querySelectorAll('ul a');
-    const sections = document.querySelectorAll('.content-section');
-
-    // Add event listeners to navigation links
-    navLinks.forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();  
-
-            // Hide all sections
-            sections.forEach(section => {
-                section.classList.remove('active');
-            });
-
-            // Show the clicked section
-            const targetSection = document.getElementById(link.getAttribute('data-target'));
-            targetSection.classList.add('active');
-        });
-    })
+        const menuItems = document.querySelectorAll("#menu li");
+        const contentDiv = document.getElementById("content");
+        
+        function executeScripts(element) {
+            // Find all script tags in the loaded content
+            const scripts = element.getElementsByTagName('script');
+            
+            for (let script of scripts) {
+                // Create a new script element
+                const newScript = document.createElement('script');
                 
+                // Copy attributes from the original script
+                for (let attr of script.attributes) {
+                    newScript.setAttribute(attr.name, attr.value);
+                }
+                
+                // Set the script content
+                if (script.textContent) {
+                    newScript.textContent = script.textContent;
+                }
+                
+                // Replace the old script with the new one to trigger execution
+                script.parentNode.replaceChild(newScript, script);
+            }
+        }
+        
+        menuItems.forEach(item => {
+            item.addEventListener("click", () => {
+                const page = item.getAttribute("data-page");
+                
+                fetch(`/get_content/${page}/`)
+                    .then(response => response.text())
+                    .then(data => {
+                        // Create a temporary div to parse the response
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = data;
+                        
+                        // Update the content
+                        contentDiv.innerHTML = data;
+                        
+                        // Execute any scripts in the loaded content
+                        executeScripts(contentDiv);
+                    })
+                    .catch(error => {
+                        console.error('Error loading content:', error);
+                        contentDiv.innerHTML = `<p>Error loading content: ${error.message}</p>`;
+                    });
+            });
+        });
+           
 
+    </script>
+    <script>
+         // Enhanced Dynamic Content Loader 
+ const mymenuItems = document.querySelectorAll("#choices li"); 
+ const mycontentDiv = document.getElementById("content-div"); 
+ function executionScripts(content) { 
+    // Create a temporary div to parse the content 
+    const tempDiv = document.createElement('div'); 
+    tempDiv.innerHTML = content; 
+    // Extract and execute scripts 
+    const scripts = tempDiv.getElementsByTagName('script'); 
+    for (let script of scripts) { 
+        const newScript = document.createElement('script'); 
+        // Copy script attributes 
+        for (let attr of script.attributes) {
+             newScript.setAttribute(attr.name, attr.value); 
+            } // Set script content 
+            if (script.textContent) { 
+                try { 
+                    // Wrap in an IIFE to provide a clean execution context 
+                    newScript.textContent = (function() { 
+                        `${script.textContent} `
+                    })();; 
+                } catch (error) { 
+                    console.error('Error processing script:', error); 
+                } 
+            } // Append to document to execute 
+            document.body.appendChild(newScript); 
+            // Remove the script to prevent duplicate executions 
+            document.body.removeChild(newScript); } } 
+            function loadDynamicContent(page) { 
+                fetch(`/get_nav_content/${page}/`) 
+                .then(response => response.text()) 
+                .then(data => { 
+                    // Update content 
+                    mycontentDiv.innerHTML = data; 
+                    // Execute any scripts in the loaded content 
+                    executionScripts(data); }) 
+                    .catch(error => { mycontentDiv.innerHTML = `Sorry, there was an error loading the content ${error}`; 
+                        console.error('Content loading error:', error); }); 
+                    }
+                     // Attach event listeners to menu items 
+                     mymenuItems.forEach((item )=> {
+                         item.addEventListener("click", () => { 
+                            const page = item.getAttribute("data-page");
+                            console.log("Menu item clicked:", page); 
+                            loadDynamicContent(page); });
+                         }); 
+                         // Fallback: Ensure scripts are loaded even if dynamically inserted 
+                         function ensureScriptExecution() { 
+                            const dynamicScripts = document.querySelectorAll('script[data-dynamic="true"]'); 
+                            dynamicScripts.forEach(script => { 
+                                try { 
+                                    // Re-execute script content 
+                                    const newScript = document.createElement('script'); 
+                                    newScript.textContent = script.textContent; 
+                                    document.body.appendChild(newScript); 
+                                    document.body.removeChild(newScript); 
+                                }catch (error) {
+                                     console.error('Script re-execution error:', error);
+                                     } 
+                                    }); 
+                                } 
+                                // Add event listener to run after content loads 
+                                document.addEventListener('DOMContentLoaded', () => { ensureScriptExecution(); });
     </script>
     
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{%static 'assets/js/bootstrap.bundle.min.js'%}"></script>
+    <script src="{% static 'js\budget.js'%}"></script>
+    <script src="{%static 'js/accounts.js'%}"></script>
 </body>
 </html>

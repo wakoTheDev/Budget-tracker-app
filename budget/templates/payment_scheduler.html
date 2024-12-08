@@ -1,0 +1,247 @@
+{%load static%}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Scheduler</title>
+    <link href="{%static 'assets/css/bootstrap.min.css'%}" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card">
+            <div class="card-header d-flex">
+                <h2 class="card-title" style="display:inline-block; margin-right:5%;">Payment Scheduler</h2>
+                <form action="{% url 'back_to_schedule'%}">
+                <button class="btn btn-danger" style="margin-left:800px; height:40px;">close</button>
+            </form>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Schedule Date</label>
+                        <input type="date" id="paymentDate" class="form-control" name="paymentDate">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Amount</label>
+                        <input type="number" id="paymentAmount" name="paymentAmount" class="form-control" placeholder="Enter amount">
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <label class="form-label">Recurrence</label>
+                        <select id="paymentRecurrence" class="form-select" name="paymentRecurrence">
+                            <option value="One-time">One-time</option>
+                            <option value="Daily">Daily</option>
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Description</label>
+                        <input type="text" id="paymentDescription" class="form-control" placeholder="Payment description" name="paymentDescription">
+                    </div>
+                </div>
+                <button id="addPaymentBtn"  class="btn btn-primary mt-3 w-100">Add Payment Schedule</button>
+            </form>
+                <div class="mt-4">
+                    <h3 class="mb-2">Scheduled Payments</h3>
+                    <table id="paymentsTable" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Recurrence</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsBody">
+                            <!-- Payments will be dynamically added here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addPaymentBtn = document.getElementById('addPaymentBtn');
+            const paymentsBody = document.getElementById('paymentsBody');
+        
+            // Function to load existing schedules
+            function loadSchedules() {
+                fetch('/get_schedules/')  
+                    .then(response => response.json())
+                    .then(data => {
+                        paymentsBody.innerHTML = ''; 
+                        data.schedules.forEach(schedule => {
+                            addScheduleToTable(schedule);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        
+            // Function to add schedule to table
+            function addScheduleToTable(schedule) {
+                const row = `
+                    <tr data-id="${schedule.id}">
+                        <td>${schedule.scheduled_date}</td>
+                        <td>$${schedule.amount}</td>
+                        <td>${schedule.status}</td>
+                        <td>${schedule.recurrence}</td>
+                        <td>${schedule.description}</td>
+                        <td>
+                            <button class="btn btn-success btn-sm update-row" data-id="${schedule.id}">Update</button>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm delete-row" data-id="${schedule.id}">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                paymentsBody.innerHTML += row;
+            }
+        
+            // Add new schedule
+            addPaymentBtn.addEventListener('click', function() {
+                const date = document.getElementById('paymentDate').value;
+                const amount = document.getElementById('paymentAmount').value;
+                const recurrence = document.getElementById('paymentRecurrence').value;
+                const description = document.getElementById('paymentDescription').value;
+        
+                if (!date || !amount) {
+                    alert('Please fill in date and amount');
+                    return;
+                }
+                const scheduleData = {
+                    'date':date,
+                    'amount':parseFloat(amount),
+                    'recurrence':recurrence,
+                    'description':description || '',
+                }
+        
+                // Send data to backend
+                fetch('add_scheduled_payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')  
+                    },
+                    body: JSON.stringify(scheduleData)})
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        console.log(data)
+                        addScheduleToTable(data.schedule);
+                        // Clear input fields
+                        document.getElementById('paymentDate').value = '';
+                        document.getElementById('paymentAmount').value = '';
+                        document.getElementById('paymentDescription').value = '';
+                    } else {
+                        console.log(data)
+                        alert('Failed to add schedule');
+                        
+                    }
+                })
+                .catch(error => console.error('Error:', error))
+            });
+        
+            // Delete schedule
+            paymentsBody.addEventListener('click', function(e) {
+                if (e.target.classList.contains('delete-row')) {
+                    const scheduleId = e.target.getAttribute('data-id');
+                    
+                    fetch(`/delete_schedule/${scheduleId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            e.target.closest('tr').remove();
+                        } else {
+                            alert('Failed to delete schedule');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+        
+                // Update schedule
+                if (e.target.classList.contains('update-row')) {
+                    const scheduleId = e.target.getAttribute('data-id');
+                    const row = e.target.closest('tr');
+
+                    // Retrieve the existing values from the table row
+                    const currentDate = row.querySelector('td:nth-child(1)').textContent;
+                    const currentRecurrence = row.querySelector('td:nth-child(4)').textContent;
+                    const currentDescription = row.querySelector('td:nth-child(5)').textContent;
+                    
+                    // Prompt for update details
+                    const newDate = prompt('Enter new date:', currentDate) || currentDate;
+                    const newRecurrence = prompt('Enter new recurrence:', currentRecurrence) || currentRecurrence;
+                    const newDescription = prompt('Enter new description:', currentDescription) || currentDescription;
+        
+                    fetch(`/update_schedule/${scheduleId}/`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            date: newDate,
+                            recurrence: newRecurrence,
+                            description: newDescription
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update table row
+                            row.querySelector('td:nth-child(1)').textContent = newDate || row.querySelector('td:nth-child(1)').textContent;
+                            row.querySelector('td:nth-child(4)').textContent = newRecurrence || row.querySelector('td:nth-child(4)').textContent;
+                            row.querySelector('td:nth-child(5)').textContent = newDescription || row.querySelector('td:nth-child(5)').textContent;
+                        } else {
+                            console.log(data)
+                            alert('Failed to update schedule');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                }
+            });
+        
+            // Load existing schedules on page load
+            loadSchedules();
+        });
+        
+        // CSRF Token helper function
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+</script>
+    
+</body>
+</html>

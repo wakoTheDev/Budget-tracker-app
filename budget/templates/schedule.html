@@ -1,0 +1,475 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenseTrack - Payment Scheduler</title>
+    <link href="{%static 'assets/css/bootstrap.min.css'%}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .custom-bg-gradient {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+        }
+        .schedule-icon {
+            font-size: 3rem;
+            opacity: 0.7;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            width: 300px;
+          }
+          .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+          }
+          .modal.active, .modal-overlay.active {
+            display: block;
+          }
+    </style>
+    <script>
+        function initializeScheduleManagement() {            
+            // Safely find the payments body
+            const paymentsBody = document.getElementById('scheduled_expenditure');
+            
+            // Exit if the element doesn't exist
+            if (!paymentsBody) {
+                console.error('Scheduled expenditure table body not found');
+                return;
+            }
+        
+            // Clear any existing event listeners
+            const oldBody = paymentsBody.cloneNode(false);
+            paymentsBody.parentNode.replaceChild(oldBody, paymentsBody);
+        
+            // Function to load existing schedules
+            function loadSchedules() {
+                console.log('Attempting to load schedules');
+                
+                fetch('/get_schedules/')  
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        oldBody.innerHTML = ''; 
+                        console.log(`Loaded ${data.schedules.length} schedules`);
+                        
+                        if (data.schedules.length === 0) {
+                            const noDataRow = `
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No scheduled expenses found
+                                    </td>
+                                </tr>
+                            `;
+                            oldBody.innerHTML = noDataRow;
+                            return;
+                        }
+        
+                        data.schedules.forEach(schedule => {
+                            addScheduleToTable(schedule);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading schedules:', error);
+                        
+                        const errorRow = `
+                            <tr>
+                                <td colspan="6" class="text-center text-danger">
+                                    Failed to load schedules. Please try again later.
+                                </td>
+                            </tr>
+                        `;
+                        oldBody.innerHTML = errorRow;
+                    });
+            }
+        
+            // Function to add schedule to table
+            function addScheduleToTable(schedule) {
+                const row = `
+                    <tr data-id="${schedule.id}">
+                        <td>${schedule.scheduled_date}</td>
+                        <td>$${parseFloat(schedule.amount).toFixed(2)}</td>
+                        <td>${schedule.status}</td>
+                        <td>${schedule.recurrence}</td>
+                        <td>${schedule.description}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1 update-row" data-id="${schedule.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger delete-row" data-id="${schedule.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                oldBody.innerHTML += row;
+            }
+        
+            // Event delegation for delete and update actions
+            oldBody.addEventListener('click', function(e) {
+                // Delete schedule
+                const deleteButton = e.target.closest('.delete-row');
+                if (deleteButton) {
+                    const scheduleId = deleteButton.getAttribute('data-id');
+                    
+                    if (!confirm('Are you sure you want to delete this schedule?')) {
+                        return;
+                    }
+                    
+                    fetch(`/delete_schedule/${scheduleId}/`, {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Delete request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            deleteButton.closest('tr').remove();
+                        } else {
+                            throw new Error(data.message || 'Failed to delete schedule');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Delete error:', error);
+                        alert('Failed to delete schedule. Please try again.');
+                    });
+                }
+        
+                // Update schedule
+                const updateButton = e.target.closest('.update-row');
+                if (updateButton) {
+                    const row = updateButton.closest('tr');
+                    const scheduleId = row.getAttribute('data-id');
+        
+                    // Retrieve the existing values from the table row
+                    const currentDate = row.querySelector('td:nth-child(1)').textContent;
+                    const currentRecurrence = row.querySelector('td:nth-child(4)').textContent;
+                    const currentDescription = row.querySelector('td:nth-child(5)').textContent;
+                    
+                    // Prompt for update details
+                    const newDate = prompt('Enter new date:', currentDate) || currentDate;
+                    const newRecurrence = prompt('Enter new recurrence:', currentRecurrence) || currentRecurrence;
+                    const newDescription = prompt('Enter new description:', currentDescription) || currentDescription;
+        
+                    fetch(`/update_schedule/${scheduleId}/`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({
+                            date: newDate,
+                            recurrence: newRecurrence,
+                            description: newDescription
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Update request failed');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Update table row
+                            row.querySelector('td:nth-child(1)').textContent = newDate;
+                            row.querySelector('td:nth-child(4)').textContent = newRecurrence;
+                            row.querySelector('td:nth-child(5)').textContent = newDescription;
+                        } else {
+                            throw new Error(data.message || 'Failed to update schedule');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Update error:', error);
+                        alert('Failed to update schedule. Please try again.');
+                    });
+                }
+            });
+        
+            // Load existing schedules
+            loadSchedules();
+        
+            // Return the body for potential further manipulation
+            return oldBody;
+        }
+        
+        // Function to fetch upcoming schedules 
+    async function fetchUpcomingSchedules() {
+        try {
+            // Get the current date and calculate 30 days later
+            const currentDate = new Date();
+            const thirtyDaysLater = new Date();
+            thirtyDaysLater.setDate(currentDate.getDate() + 30);
+
+            // Prepare request body
+            const requestBody = {
+                start_date: currentDate.toISOString().split('T')[0],
+                end_date: thirtyDaysLater.toISOString().split('T')[0]
+            };
+
+            const response = await fetch('/api/upcoming-schedules/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+
+            const data = await response.json();
+            displayUpcomingSchedules(data.schedules);
+            updateScheduleCount(data.schedules.length);
+
+        } catch (error) {
+            console.error('Error fetching upcoming schedules:', error);
+            handleScheduleError(error);
+        }
+    }
+
+    // Function to display upcoming schedules
+    function displayUpcomingSchedules(schedules) {
+        const scheduleContainer = document.getElementById('upcoming-schedules');
+
+        // Clear existing content
+        scheduleContainer.innerHTML = '';
+
+        if (schedules.length === 0) {
+            scheduleContainer.innerHTML = '<p>No upcoming schedules in the next 30 days.</p>';
+            return;
+        }
+
+        const scheduleList = document.createElement('ul');
+        scheduleList.className = 'list-group';
+
+        schedules.forEach(schedule => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item';
+
+            const scheduleDate = new Date(schedule.date);
+            const formattedDate = scheduleDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            listItem.innerHTML = `
+                <div>
+                    <h6 class="my-0">${schedule.description}</h6>
+                </div>
+                <span class="badge bg-primary rounded-pill">${scheduleformattedDate}</span>
+            `;
+
+            scheduleList.appendChild(listItem);
+        });
+
+        scheduleContainer.appendChild(scheduleList);
+    }
+
+     // Function to update schedule count
+    function updateScheduleCount(count) {
+        const countElement = document.getElementById('schedule-count');
+        if (countElement) {
+            countElement.textContent = count;
+        }
+    }
+
+    // Error handling function
+    function handleScheduleError(error) {
+        const scheduleContainer = document.getElementById('upcoming-schedules');
+        scheduleContainer.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                Unable to load schedules. ${error.message}
+            </div>
+        `;
+    }
+
+    // Load upcoming schedules when the page loads
+    fetchUpcomingSchedules();
+
+    // Optionally, refresh the upcoming schedules every 5 minutes
+    setInterval(fetchUpcomingSchedules, 5 * 60 * 1000); 
+
+
+// CSRF Token helper function
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+        
+        // If you want to run on initial page load
+        document.addEventListener('DOMContentLoaded', initializeScheduleManagement);
+            
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-dark custom-bg-gradient mb-4">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-chart-line me-2"></i>ExpenseTrack
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'limit_form'%}">Limits</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#"><i class="fas fa-wallet me-1"></i>Expenses</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'scheduler'%}"><i class="fas fa-calendar-alt me-1"></i>Schedule</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'dashboard'%}"><i class="fas fa-home me-1"></i>Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Recurring Payments</h5>
+                                    <p class="text-muted">Manage monthly subscriptions</p>
+                                </div>
+                                <i class="fas fa-repeat schedule-icon text-primary"></i>
+                            </div>
+                            <form action="scheduler" >
+                            <button class="btn btn-primary mt-3 w-100" type='submit'>
+                                <i class="fas fa-plus me-2"></i>Add Recurring Payment
+                            </button>
+                        </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Upcoming Expenses</h5>
+                                    <p class="text-muted">Next 30 days overview</p>
+                                </div>
+                                <i class="fas fa-calendar-check schedule-icon text-success"></i>
+                            </div>
+                            <div><P>Expense count </p><span class="badge bg-primary" id="schedule-count"></span></div>
+                            <ul class="list-group list-group-flush mt-3" id="upcoming-schedules">
+                                                            
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card dashboard-card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title">Budget Tracking</h5>
+                                    <p class="text-muted">Monthly spending limit</p>
+                                </div>
+                                <i class="fas fa-chart-pie schedule-icon text-warning"></i>
+                            </div>
+                            <div class="progress mt-3" style="height: 20px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 65%;" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100">$1,300 / $2,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header custom-bg-gradient text-white">
+                            <h4 class="mb-0">
+                                <i class="fas fa-calendar-alt me-2"></i>Expense Calendar
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Frequecy</th>
+                                            <th>Description</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="scheduled_expenditure">
+                                        <!-- More table rows would go here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</body>
+</html>

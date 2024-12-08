@@ -1,0 +1,489 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Profile Management</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .list-group-item-action {
+            transition: all 0.3s ease;
+        }
+        .list-group-item-action:hover {
+            background-color: #f1f3f5;
+            transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="profile-header text-center">
+                    <img src="/api/placeholder/150/150" class="rounded-circle mb-3" alt="Profile Picture">
+                    <h3 id="profileName">John Doe</h3>
+                    <p id="profileUsername" class="text-muted">@johndoe</p>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header">
+                        Profile Navigation
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="#personal-info" class="list-group-item list-group-item-action active" data-bs-toggle="tab">
+                            <i class="fas fa-user me-2"></i>Personal Information
+                        </a>
+                        <a href="#accounts" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-wallet me-2"></i>Linked Accounts
+                            <span id="accountBadge" class="badge bg-primary float-end">3</span>
+                        </a>
+                        <a href="#schedules" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-calendar-alt me-2"></i>Upcoming Schedules
+                            <span id="scheduleBadge" class="badge bg-warning float-end">2</span>
+                        </a>
+                        <a href="#preferences" class="list-group-item list-group-item-action" data-bs-toggle="tab">
+                            <i class="fas fa-cog me-2"></i>Preferences
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="tab-content">
+                    <!-- Personal Information Tab -->
+                    <div class="tab-pane fade show active" id="personal-info">
+                        <div class="card">
+                            <div class="card-header">
+                                Personal Details
+                                <button class="btn btn-sm btn-outline-primary float-end" id="editPersonalInfo">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Full Name:</strong>
+                                        <p id="fullNameDisplay">John Michael Doe</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Email:</strong>
+                                        <p id="emailDisplay">john.doe@example.com</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Phone Number:</strong>
+                                        <p id="phoneDisplay">+1 (555) 123-4567</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Registration Date:</strong>
+                                        <p id="registrationDate">June 15, 2023</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Accounts Tab -->
+                    <div class="tab-pane fade" id="accounts">
+                        <div class="card">
+                            <div class="card-header">
+                                Linked Accounts
+                                <button class="btn btn-sm btn-success float-end" id="addNewAccount">
+                                    <i class="fas fa-plus"></i> Add Account
+                                </button>
+                            </div>
+                            <div class="card-body" id="accountsList">
+                                <!-- Accounts will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedules Tab -->
+                    <div class="tab-pane fade" id="schedules">
+                        <div class="card">
+                            <div class="card-header">
+                                Upcoming Schedules
+                                <button class="btn btn-sm btn-success float-end" id="addNewSchedule">
+                                    <i class="fas fa-plus"></i> Add Schedule
+                                </button>
+                            </div>
+                            <div class="card-body" id="schedulesList">
+                                <!-- Schedules will be dynamically added here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Preferences Tab -->
+                    <div class="tab-pane fade" id="preferences">
+                        <div class="card">
+                            <div class="card-header">Account Preferences</div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="notificationToggle" checked>
+                                        <label class="form-check-label" for="notificationToggle">
+                                            Enable Notifications
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="privacyToggle">
+                                        <label class="form-check-label" for="privacyToggle">
+                                            Private Profile
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Language Preference</label>
+                                    <select class="form-select" id="languageSelect">
+                                        <option selected>English (US)</option>
+                                        <option>Spanish</option>
+                                        <option>French</option>
+                                        <option>German</option>
+                                    </select>
+                                </div>
+                                <button class="btn btn-primary" id="savePreferences">Save Preferences</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <!-- Edit Personal Info Modal -->
+    <div class="modal fade" id="editPersonalInfoModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Personal Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="personalInfoForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullNameInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="emailInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phoneInput" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Account Modal -->
+    <div class="modal fade" id="addAccountModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addAccountForm">
+                        <div class="mb-3">
+                            <label class="form-label">Account Type</label>
+                            <select class="form-select" id="accountTypeSelect" required>
+                                <option value="">Select Account Type</option>
+                                <option value="bank">Bank Account</option>
+                                <option value="mobile">Mobile Money</option>
+                                <option value="crypto">Crypto Wallet</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Account Details</label>
+                            <input type="text" class="form-control" id="accountDetailsInput" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Add Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Schedule Modal -->
+    <div class="modal fade" id="addScheduleModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Schedule</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addScheduleForm">
+                        <div class="mb-3">
+                            <label class="form-label">Schedule Type</label>
+                            <select class="form-select" id="scheduleTypeSelect" required>
+                                <option value="">Select Schedule Type</option>
+                                <option value="payment">Recurring Payment</option>
+                                <option value="transfer">Fund Transfer</option>
+                                <option value="savings">Savings Contribution</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="scheduleAmountInput" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Frequency</label>
+                            <select class="form-select" id="scheduleFrequencySelect" required>
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="quarterly">Quarterly</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Schedule</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const editPersonalInfoBtn = document.getElementById('editPersonalInfo');
+            const editPersonalInfoModal = new bootstrap.Modal(document.getElementById('editPersonalInfoModal'));
+            const personalInfoForm = document.getElementById('personalInfoForm');
+            const addAccountBtn = document.getElementById('addNewAccount');
+            const addAccountModal = new bootstrap.Modal(document.getElementById('addAccountModal'));
+            const addAccountForm = document.getElementById('addAccountForm');
+            const addScheduleBtn = document.getElementById('addNewSchedule');
+            const addScheduleModal = new bootstrap.Modal(document.getElementById('addScheduleModal'));
+            const addScheduleForm = document.getElementById('addScheduleForm');
+            const accountsList = document.getElementById('accountsList');
+            const schedulesList = document.getElementById('schedulesList');
+            const accountBadge = document.getElementById('accountBadge');
+            const scheduleBadge = document.getElementById('scheduleBadge');
+
+            // Mock Data
+            let accounts = [
+                { id: 1, type: 'Bank', details: '**** **** 4567', balance: 5000 },
+                { id: 2, type: 'Mobile Money', details: '+1 (555) 123-4567', balance: 2500 },
+                { id: 3, type: 'Crypto', details: '0x1234...5678', balance: 0.5 }
+            ];
+
+            let schedules = [
+                { 
+                    id: 1, 
+                    type: 'Recurring Payment', 
+                    amount: 500, 
+                    frequency: 'Monthly', 
+                    nextDate: '2024-01-15' 
+                },
+                { 
+                    id: 2, 
+                    type: 'Savings Contribution', 
+                    amount: 200, 
+                    frequency: 'Weekly', 
+                    nextDate: '2024-01-08' 
+                }
+            ];
+
+            // Render Accounts
+            function renderAccounts() {
+                accountsList.innerHTML = '';
+                accounts.forEach(account => {
+                    const accountItem = document.createElement('div');
+                    accountItem.className = 'card mb-2';
+                    accountItem.innerHTML = `
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">${account.type} Account</h6>
+                                <p class="card-text text-muted">${account.details}</p>
+                                <small>Balance: $${account.balance}</small>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-danger me-2 delete-account" data-id="${account.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    accountsList.appendChild(accountItem);
+                });
+                accountBadge.textContent = accounts.length;
+
+                // Add delete account listeners
+                document.querySelectorAll('.delete-account').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const accountId = parseInt(this.getAttribute('data-id'));
+                        accounts = accounts.filter(acc => acc.id !== accountId);
+                        renderAccounts();
+                    });
+                });
+            }
+
+            // Render Schedules
+            function renderSchedules() {
+                schedulesList.innerHTML = '';
+                schedules.forEach(schedule => {
+                    const scheduleItem = document.createElement('div');
+                    scheduleItem.className = 'card mb-2';
+                    scheduleItem.innerHTML = `
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title">${schedule.type}</h6>
+                                <p class="card-text">
+                                    Amount: $${schedule.amount}<br>
+                                    Frequency: ${schedule.frequency}<br>
+                                    Next Date: ${schedule.nextDate}
+                                </p>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-warning me-2 edit-schedule" data-id="${schedule.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger delete-schedule" data-id="${schedule.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    schedulesList.appendChild(scheduleItem);
+                });
+                scheduleBadge.textContent = schedules.length;
+
+                // Add delete schedule listeners
+                document.querySelectorAll('.delete-schedule').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const scheduleId = parseInt(this.getAttribute('data-id'));
+                        schedules = schedules.filter(sch => sch.id !== scheduleId);
+                        renderSchedules();
+                    });
+                });
+            }
+
+            // Edit Personal Info
+            editPersonalInfoBtn.addEventListener('click', function() {
+                const fullName = document.getElementById('fullNameDisplay').textContent;
+                const email = document.getElementById('emailDisplay').textContent;
+                const phone = document.getElementById('phoneDisplay').textContent;
+
+                document.getElementById('fullNameInput').value = fullName;
+                document.getElementById('emailInput').value = email;
+                document.getElementById('phoneInput').value = phone;
+
+                editPersonalInfoModal.show();
+            });
+
+            // Save Personal Info
+            personalInfoForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const fullName = document.getElementById('fullNameInput').value;
+                const email = document.getElementById('emailInput').value;
+                const phone = document.getElementById('phoneInput').value;
+
+                document.getElementById('fullNameDisplay').textContent = fullName;
+                document.getElementById('emailDisplay').textContent = email;
+                document.getElementById('phoneDisplay').textContent = phone;
+
+                editPersonalInfoModal.hide();
+            });
+
+            // Add New Account
+            addAccountBtn.addEventListener('click', function() {
+                addAccountModal.show();
+            });
+
+            // Save New Account
+            addAccountForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const accountType = document.getElementById('accountTypeSelect').value;
+                const accountDetails = document.getElementById('accountDetailsInput').value;
+
+                const newAccount = {
+                    id: accounts.length + 1,
+                    type: accountType.charAt(0).toUpperCase() + accountType.slice(1),
+                    details: accountDetails,
+                    balance: 0 // Default balance
+                };
+
+                accounts.push(newAccount);
+                renderAccounts();
+                addAccountModal.hide();
+                
+                // Reset form
+                addAccountForm.reset();
+            });
+
+            // Add New Schedule
+            addScheduleBtn.addEventListener('click', function() {
+                addScheduleModal.show();
+            });
+
+            // Save New Schedule
+            addScheduleForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const scheduleType = document.getElementById('scheduleTypeSelect').value;
+                const amount = document.getElementById('scheduleAmountInput').value;
+                const frequency = document.getElementById('scheduleFrequencySelect').value;
+
+                const newSchedule = {
+                    id: schedules.length + 1,
+                    type: scheduleType.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+                    amount: parseFloat(amount),
+                    frequency: frequency.charAt(0).toUpperCase() + frequency.slice(1),
+                    nextDate: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0] // 30 days from now
+                };
+
+                schedules.push(newSchedule);
+                renderSchedules();
+                addScheduleModal.hide();
+                
+                // Reset form
+                addScheduleForm.reset();
+            });
+
+            // Save Preferences
+            savePreferencesBtn.addEventListener('click', function() {
+                const notificationsEnabled = document.getElementById('notificationToggle').checked;
+                const privateProfile = document.getElementById('privacyToggle').checked;
+                const language = document.getElementById('languageSelect').value;
+
+                // In a real app, you'd send these to backend
+                console.log('Preferences saved:', {
+                    notifications: notificationsEnabled,
+                    privateProfile: privateProfile,
+                    language: language
+                });
+
+                alert('Preferences saved successfully!');
+            });
+
+            // Initial renders
+            renderAccounts();
+            renderSchedules();
+        });
+    </script>
+</body>
+</html>
+

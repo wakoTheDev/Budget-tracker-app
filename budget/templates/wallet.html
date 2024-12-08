@@ -1,0 +1,229 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Wallet Connection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .wallet-card {
+            transition: transform 0.3s ease;
+        }
+        .wallet-card:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Payment Wallets</h2>
+        
+        <div id="connectedAccountsSection">
+            <h4 class="mb-3">Connected Accounts</h4>
+            <div id="connectedAccountsList" class="row">
+                <!-- Connected accounts will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card wallet-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-mobile-alt fa-3x mb-3 text-primary"></i>
+                        <h5 class="card-title">Mobile Money</h5>
+                        <p class="card-text">Connect your mobile money account</p>
+                        <button id="mobileMoney" class="btn btn-primary connect-wallet" data-wallet-type="mobile">
+                            Connect Mobile Money
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card wallet-card">
+                    <div class="card-body text-center">
+                        <i class="fas fa-university fa-3x mb-3 text-success"></i>
+                        <h5 class="card-title">Bank Account</h5>
+                        <p class="card-text">Link your bank account</p>
+                        <button id="bankAccount" class="btn btn-success connect-wallet" data-wallet-type="bank">
+                            Connect Bank Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card wallet-card">
+                    <div class="card-body text-center">
+                        <i class="fab fa-bitcoin fa-3x mb-3 text-warning"></i>
+                        <h5 class="card-title">Crypto Wallet</h5>
+                        <p class="card-text">Connect your crypto wallet</p>
+                        <button id="cryptoWallet" class="btn btn-warning connect-wallet" data-wallet-type="crypto">
+                            Connect Crypto Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Wallet Connection -->
+    <div class="modal fade" id="walletConnectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Connect Wallet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="walletConnectionForm">
+                        <div class="mb-3">
+                            <label class="form-label" id="walletIdentifierLabel"></label>
+                            <input type="text" class="form-control" id="walletIdentifierInput" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Confirm Connection</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const connectButtons = document.querySelectorAll('.connect-wallet');
+            const connectedAccountsList = document.getElementById('connectedAccountsList');
+            const walletConnectionModal = new bootstrap.Modal(document.getElementById('walletConnectionModal'));
+            const walletConnectionForm = document.getElementById('walletConnectionForm');
+            const walletIdentifierLabel = document.getElementById('walletIdentifierLabel');
+            const walletIdentifierInput = document.getElementById('walletIdentifierInput');
+
+            let currentWalletType = '';
+
+            // Function to get connected wallets from localStorage
+            function getConnectedWallets() {
+                return JSON.parse(localStorage.getItem('connectedWallets') || '[]');
+            }
+
+            // Function to save connected wallets to localStorage
+            function saveConnectedWallets(wallets) {
+                localStorage.setItem('connectedWallets', JSON.stringify(wallets));
+            }
+
+            // Function to render connected accounts
+            function renderConnectedAccounts() {
+                const connectedWallets = getConnectedWallets();
+                connectedAccountsList.innerHTML = ''; // Clear existing accounts
+
+                if (connectedWallets.length === 0) {
+                    connectedAccountsList.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                No accounts connected yet. Connect a wallet to get started.
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    connectedWallets.forEach((wallet, index) => {
+                        const walletCard = document.createElement('div');
+                        walletCard.className = 'col-md-4 mb-3';
+                        walletCard.innerHTML = `
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        ${wallet.type.charAt(0).toUpperCase() + wallet.type.slice(1)} Wallet
+                                    </h5>
+                                    <p class="card-text">${wallet.identifier}</p>
+                                    <button class="btn btn-danger btn-sm disconnect-wallet" data-index="${index}">
+                                        Disconnect
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        connectedAccountsList.appendChild(walletCard);
+                    });
+
+                    // Add disconnect functionality
+                    document.querySelectorAll('.disconnect-wallet').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const index = this.getAttribute('data-index');
+                            const connectedWallets = getConnectedWallets();
+                            connectedWallets.splice(index, 1);
+                            saveConnectedWallets(connectedWallets);
+                            renderConnectedAccounts();
+                        });
+                    });
+                }
+            }
+
+            // Render connected accounts on page load
+            renderConnectedAccounts();
+
+            connectButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    currentWalletType = this.getAttribute('data-wallet-type');
+                    
+                    // Set dynamic label based on wallet type
+                    switch(currentWalletType) {
+                        case 'mobile':
+                            walletIdentifierLabel.textContent = 'Mobile Number';
+                            break;
+                        case 'bank':
+                            walletIdentifierLabel.textContent = 'Bank Account Number';
+                            break;
+                        case 'crypto':
+                            walletIdentifierLabel.textContent = 'Wallet Address';
+                            break;
+                    }
+
+                    walletConnectionModal.show();
+                });
+            });
+
+            walletConnectionForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const walletIdentifier = walletIdentifierInput.value;
+
+                // Get existing wallets
+                const connectedWallets = getConnectedWallets();
+
+                // Check if wallet already exists
+                const existingWallet = connectedWallets.find(
+                    wallet => wallet.type === currentWalletType
+                );
+
+                if (existingWallet) {
+                    alert(`A ${currentWalletType} wallet is already connected. Disconnect it first.`);
+                    walletConnectionModal.hide();
+                    return;
+                }
+
+                // Add new wallet
+                connectedWallets.push({
+                    type: currentWalletType,
+                    identifier: walletIdentifier
+                });
+
+                // Save to localStorage
+                saveConnectedWallets(connectedWallets);
+
+                // Re-render connected accounts
+                renderConnectedAccounts();
+                
+                // Hide modal
+                walletConnectionModal.hide();
+                
+                // Clear input
+                walletIdentifierInput.value = '';
+            });
+        });
+    </script>
+</body>
+</html>
