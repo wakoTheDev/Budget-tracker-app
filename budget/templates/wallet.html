@@ -97,31 +97,32 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeWalletConnection() {
+            console.log('Initializing Wallet Connection');
             const connectButtons = document.querySelectorAll('.connect-wallet');
             const connectedAccountsList = document.getElementById('connectedAccountsList');
             const walletConnectionModal = new bootstrap.Modal(document.getElementById('walletConnectionModal'));
             const walletConnectionForm = document.getElementById('walletConnectionForm');
             const walletIdentifierLabel = document.getElementById('walletIdentifierLabel');
             const walletIdentifierInput = document.getElementById('walletIdentifierInput');
-
+        
             let currentWalletType = '';
-
+        
             // Function to get connected wallets from localStorage
             function getConnectedWallets() {
                 return JSON.parse(localStorage.getItem('connectedWallets') || '[]');
             }
-
+        
             // Function to save connected wallets to localStorage
             function saveConnectedWallets(wallets) {
                 localStorage.setItem('connectedWallets', JSON.stringify(wallets));
             }
-
+        
             // Function to render connected accounts
             function renderConnectedAccounts() {
                 const connectedWallets = getConnectedWallets();
-                connectedAccountsList.innerHTML = ''; // Clear existing accounts
-
+                connectedAccountsList.innerHTML = ''; 
+        
                 if (connectedWallets.length === 0) {
                     connectedAccountsList.innerHTML = `
                         <div class="col-12">
@@ -149,7 +150,7 @@
                         `;
                         connectedAccountsList.appendChild(walletCard);
                     });
-
+        
                     // Add disconnect functionality
                     document.querySelectorAll('.disconnect-wallet').forEach(button => {
                         button.addEventListener('click', function() {
@@ -162,10 +163,10 @@
                     });
                 }
             }
-
+        
             // Render connected accounts on page load
             renderConnectedAccounts();
-
+        
             connectButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     currentWalletType = this.getAttribute('data-wallet-type');
@@ -182,38 +183,38 @@
                             walletIdentifierLabel.textContent = 'Wallet Address';
                             break;
                     }
-
+        
                     walletConnectionModal.show();
                 });
             });
-
+        
             walletConnectionForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const walletIdentifier = walletIdentifierInput.value;
-
+        
                 // Get existing wallets
                 const connectedWallets = getConnectedWallets();
-
+        
                 // Check if wallet already exists
                 const existingWallet = connectedWallets.find(
                     wallet => wallet.type === currentWalletType
                 );
-
+        
                 if (existingWallet) {
                     alert(`A ${currentWalletType} wallet is already connected. Disconnect it first.`);
                     walletConnectionModal.hide();
                     return;
                 }
-
+        
                 // Add new wallet
                 connectedWallets.push({
                     type: currentWalletType,
                     identifier: walletIdentifier
                 });
-
+        
                 // Save to localStorage
                 saveConnectedWallets(connectedWallets);
-
+        
                 // Re-render connected accounts
                 renderConnectedAccounts();
                 
@@ -223,7 +224,27 @@
                 // Clear input
                 walletIdentifierInput.value = '';
             });
-        });
+        }
+        
+        // Safe initialization method
+        function safeInitialize() {
+            console.log('Attempting to initialize wallet connection');
+            try {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeWalletConnection);
+                } else {
+                    initializeWalletConnection();
+                }
+            } catch (error) {
+                console.error('Error in safe initialization:', error);
+            }
+        }
+        
+        // Ensure script runs even in async environments
+        if (typeof safeInitialize === 'function') {
+            safeInitialize();
+        }
+
     </script>
 </body>
 </html>

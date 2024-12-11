@@ -1,11 +1,14 @@
 {%load static%}
+<!DOCTYPE html>
+<head></head>
+<body>
+<!-- Earnings Cards -->
 <div class="row">
-    <!-- Earnings Cards -->
     <div class="col-md-4 mb-4">
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Earnings (Monthly)</h5>
-                <p class="card-text">$40,000</p>
+                <p class="card-text" id="monthlyEarnings">$0</p>
             </div>
         </div>
     </div>
@@ -13,7 +16,7 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Earnings (Annual)</h5>
-                <p class="card-text">$215,000</p>
+                <p class="card-text" id="annualEarnings">$0</p>
             </div>
         </div>
     </div>
@@ -21,9 +24,9 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Tasks</h5>
-                <p class="card-text">50%</p>
+                <p class="card-text" id="tasksCompletion">0%</p>
                 <div class="progress">
-                    <div class="progress-bar" style="width: 50%;" role="progressbar"></div>
+                    <div class="progress-bar" id="tasksProgressBar" style="width: 0%;" role="progressbar"></div>
                 </div>
             </div>
         </div>
@@ -36,12 +39,8 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Projects</h5>
-                <ul>
-                    <li>Server Migration - 20%</li>
-                    <li>Sales Tracking - 40%</li>
-                    <li>Customer Database - 60%</li>
-                    <li>Payout Details - 80%</li>
-                    <li>Account Setup - 100%</li>
+                <ul id="projectProgressList">
+                    <!-- Dynamic project list will be populated here -->
                 </ul>
             </div>
         </div>
@@ -50,10 +49,130 @@
         <div class="card shadow-sm">
             <div class="card-body">
                 <h5 class="card-title">Revenue Sources</h5>
-                <div class="d-flex justify-content-center">
-                    <div class="pie-chart" style="width: 150px; height: 150px; border-radius: 50%; background-color: #4e73df;"></div>
+                <div 
+                    id="revenueSourcesChartContainer" 
+                    style="width: 100%; height: 250px;"
+                >
+                    <!-- Pie chart will be rendered here -->
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Required Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/color@3.2.1/color.min.js"></script>
+
+<script>
+    (function(){
+        document.addEventListener('DOMContentLoaded', () => {
+            // Function to fetch and render income sources pie chart
+            async function fetchAndRenderIncomeSources() {
+                try {
+                    const response = await fetch('/get-income-sources/');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch income sources');
+                    }
+                    const data = await response.json();
+        
+                    // Prepare data for pie chart
+                    const sources = data.income_sources.map(source => source.source);
+                    const amounts = data.income_sources.map(source => parseFloat(source.monthly_amount));
+        
+                    // Render pie chart
+                    renderPieChart(
+                        'incomeSourcesChart', 
+                        'Income Sources', 
+                        sources, 
+                        amounts, 
+                        ['#28a745', '#20c997', '#17a2b8', '#ffc107', '#dc3545']
+                    );
+                } catch (error) {
+                    console.error('Error fetching income sources:', error);
+                }
+            }
+        
+            // Function to fetch and render expense categories pie chart
+            async function fetchAndRenderExpenseCategories() {
+                try {
+                    const response = await fetch('/get-expense-categories/');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch expense categories');
+                    }
+                    const data = await response.json();
+        
+                    // Prepare data for pie chart
+                    const categories = data.expense_categories.map(expense => expense.category);
+                    const amounts = data.expense_categories.map(expense => parseFloat(expense.monthly_budget));
+        
+                    // Render pie chart
+                    renderPieChart(
+                        'expenseCategoriesChart', 
+                        'Expense Categories', 
+                        categories, 
+                        amounts, 
+                        ['#dc3545', '#fd7e14', '#ffc107', '#28a745', '#17a2b8']
+                    );
+                } catch (error) {
+                    console.error('Error fetching expense categories:', error);
+                }
+            }
+        
+            // Universal pie chart rendering function using Chart.js
+            function renderPieChart(canvasId, chartTitle, labels, data, colors) {
+                // Create canvas if not exists
+                let canvas = document.getElementById(canvasId);
+                if (!canvas) {
+                    canvas = document.createElement('canvas');
+                    canvas.id = canvasId;
+                    document.getElementById('chartsContainer').appendChild(canvas);
+                }
+        
+                // Chart.js configuration
+                new Chart(canvas, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: colors,
+                            hoverBackgroundColor: colors.map(color => 
+                                Color(color).lighten(0.2).hex()
+                            )
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: chartTitle,
+                                font: {
+                                    size: 16
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(2);
+                                        return `$${value.toFixed(2)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        
+            // Fetch and render charts on page load
+            fetchAndRenderIncomeSources();
+            fetchAndRenderExpenseCategories();
+        });
+        
+    })();
+</script>
+</body>
+</html>

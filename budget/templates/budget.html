@@ -1,892 +1,1345 @@
-{% load static%}
-<DOCTYPE html>
-<html>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Planning App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-<div>
+<div class="container-fluid">
     <section style="display:block;">
-        <nav >
-            <ul id="choices" style="list-style:none;  display:flex; align-content:center; justify-content:center; "  >
-                <li class="items" data-page="annually">annaul</li>
-                <li class="items" data-page="monthly">month</li>
-                <li class="items" data-page="weekly">week</li>
-                <li class="items" data-page="daily">daily</li>
-                <li class="items" data-page="history">my history</li>
+        <nav>
+            <ul id="choices" style="list-style:none; display:flex; align-content:center; justify-content:center;">
+                <li class="items" data-page="annually">Annual</li>
+                <li class="items" data-page="monthly">Monthly</li>
+                <li class="items" data-page="weekly">Weekly</li>
+                <li class="items" data-page="daily">Daily</li>
+                <li class="items" data-page="history">My History</li>
             </ul>
         </nav>
     </section>
+
     <div id="budget-content">
-    <section class="container py-5" id="content-div">
-        <div class="container py-5" >
-            <div class="card shadow-smcontent-section " id="annually" >
-                <div class="card-header bg-primary text-white text-center">
-                    <h1 class="h3 mb-0">Annual Budget Planning Form</h1>
-                </div>
-                <div class="card-body">
-                    <form id="budgetForm">
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label for="name" class="form-label">Name/Organization</label>
-                                <input type="text" class="form-control" id="name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="year" class="form-label">Budget Year</label>
-                                <input type="number" class="form-control" id="year" min="2024" max="2050" required>
-                            </div>
-                        </div>
-        
-                        <div class="card mb-3">
-                            <div class="card-header bg-success text-white">
-                                <h2 class="h5 mb-0">Income Sources</h2>
-                            </div>
-                            <div class="card-body">
-                                <div id="incomeContainer">
-                                    <div class="row income-item mb-2">
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control income-source" placeholder="Income Source">
+        <!-- Annual Budget Section -->
+        <section id="annually" class="content-section">
+            <div class="container py-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3 mb-0">Annual Budget Planning Form</h1>
+                    </div>
+                    <div class="card-body">
+                        <form id="annualBudgetForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="name" class="form-label">Name/Organization</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="year" class="form-label">Budget Year</label>
+                                        <input type="number" class="form-control" id="year" min="2024" max="2050" required>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <h2 class="h5 mb-0">Income Sources</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="incomeContainerAnnually">
+                                            <div class="row income-item mb-2">
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control income-source" placeholder="Income Source">
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <input type="number" class="form-control income-amount" placeholder="Monthly Amount" min="0" step="0.01">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-income-btn d-none">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-5">
-                                            <input type="number" class="form-control income-amount" placeholder="Monthly Amount" min="0" step="0.01">
+                                        <button type="button" id="addIncomeButton" class="btn btn-outline-success mt-2">
+                                            <i class="bi bi-plus"></i> Add Income Source
+                                        </button>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-danger text-white">
+                                        <h2 class="h5 mb-0">Expense Categories</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="expenseContainerAnnually">
+                                            <div class="row expense-item mb-2">
+                                                <div class="col-md-6">
+                                                    <select class="form-select expense-category">
+                                                        <option value="">Select Category</option>
+                                                        <option value="housing">Housing</option>
+                                                        <option value="utilities">Utilities</option>
+                                                        <option value="transportation">Transportation</option>
+                                                        <option value="food">Food</option>
+                                                        <option value="healthcare">Healthcare</option>
+                                                        <option value="insurance">Insurance</option>
+                                                        <option value="debt">Debt Payments</option>
+                                                        <option value="entertainment">Entertainment</option>
+                                                        <option value="personal">Personal Care</option>
+                                                        <option value="savings">Savings</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <input type="number" class="form-control expense-amount" placeholder="Monthly Budget" min="0" step="0.01">
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-expense-btn d-none">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-danger remove-income-btn d-none">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <button type="button" id="addExpenseButton" class="btn btn-outline-danger mt-2">
+                                            <i class="bi bi-plus"></i> Add Expense Category
+                                        </button>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3 bg-light">
+                                    <div class="card-header bg-info text-white">
+                                        <h2 class="h5 mb-0">Budget Summary</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Total Monthly Income</label>
+                                                <div class="alert alert-success" role="alert">
+                                                    <strong id="totalIncome">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Total Monthly Expenses</label>
+                                                <div class="alert alert-danger" role="alert">
+                                                    <strong id="totalExpenses">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Monthly Surplus/Deficit</label>
+                                                <div class="alert" role="alert" id="monthlySurplusAlert">
+                                                    <strong id="monthlySurplus">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Annual Surplus/Deficit</label>
+                                                <div class="alert" role="alert" id="annualSurplusAlert">
+                                                    <strong id="annualSurplus">$0.00</strong>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="addIncomeBtn" class="btn btn-outline-success mt-2">
-                                    <i class="bi bi-plus"></i> Add Income Source
-                                </button>
-                            </div>
-                        </div>
-        
-                        <div class="card mb-3">
-                            <div class="card-header bg-danger text-white">
-                                <h2 class="h5 mb-0">Expense Categories</h2>
-                            </div>
-                            <div class="card-body">
-                                <div id="expenseContainer">
-                                    <div class="row expense-item mb-2">
-                                        <div class="col-md-6">
-                                            <select class="form-select expense-category">
-                                                <option value="">Select Category</option>
-                                                <option value="housing">Housing</option>
-                                                <option value="utilities">Utilities</option>
-                                                <option value="transportation">Transportation</option>
-                                                <option value="food">Food</option>
-                                                <option value="healthcare">Healthcare</option>
-                                                <option value="insurance">Insurance</option>
-                                                <option value="debt">Debt Payments</option>
-                                                <option value="entertainment">Entertainment</option>
-                                                <option value="personal">Personal Care</option>
-                                                <option value="savings">Savings</option>
-                                                <option value="other">Other</option>
+                
+                                <div class="mb-3">
+                                    <label class="form-label">Additional Notes</label>
+                                    <textarea class="form-control" rows="4" placeholder="Financial goals, comments..."></textarea>
+                                </div>
+                                
+                                <div class="text-center">
+                                    <button type="button" id="annualSaveBtn" class="btn btn-primary btn-lg">
+                                        Save 
+                                    </button>
+                                    <button type="button" id="annualClearBtn" class="btn btn-primary btn-lg">
+                                        Clear
+                                    </button>                                   
+                                </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Monthly Budget Section -->
+        <section id="monthly" class="content-section">
+            <div class="container py-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3 mb-0">Monthly Budget Planning Form</h1>
+                    </div>
+                    <div class="card-body">
+                        <form id="monthlyBudgetForm">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="monthSelect" class="form-label">Month</label>
+                                        <select id="monthSelect" class="form-select" required>
+                                            <option value="">Select Month</option>
+                                            <option value="1">January</option>
+                                            <option value="2">February</option>
+                                            <option value="3">March</option>
+                                            <option value="4">April</option>
+                                            <option value="5">May</option>
+                                            <option value="6">June</option>
+                                            <option value="7">July</option>
+                                            <option value="8">August</option>
+                                            <option value="9">September</option>
+                                            <option value="10">October</option>
+                                            <option value="11">November</option>
+                                            <option value="12">December</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="yearInput" class="form-label">Year</label>
+                                        <input type="number" class="form-control" id="yearInput" min="2020" max="2050" required>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="periodType" class="form-label">Budget Period</label>
+                                        <select id="periodType" class="form-select">
+                                            <option value="monthly">Monthly</option>
+                                            <option value="weekly">Weekly</option>
+                                            <option value="daily">Daily</option>
+                                        </select>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-success text-white">
+                                        <h2 class="h5 mb-0">Income Sources</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="incomeContainer">
+                                            <div class="row income-item mb-2">
+                                                <div class="col-md-6">
+                                                    <input type="text" class="form-control income-source" placeholder="Income Source (e.g., Salary, Freelance)">
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" class="form-control income-amount" placeholder="Amount" min="0" step="0.01">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-income-btn d-none">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="addIncomeBtn" class="btn btn-outline-success mt-2">
+                                            <i class="bi bi-plus"></i> Add Income Source
+                                        </button>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-danger text-white">
+                                        <h2 class="h5 mb-0">Expense Categories</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="expenseContainer">
+                                            <div class="row expense-item mb-2">
+                                                <div class="col-md-6">
+                                                    <select class="form-select expense-category">
+                                                        <option value="">Select Expense Category</option>
+                                                        <option value="housing">Housing/Rent</option>
+                                                        <option value="utilities">Utilities</option>
+                                                        <option value="transportation">Transportation</option>
+                                                        <option value="food">Food</option>
+                                                        <option value="groceries">Groceries</option>
+                                                        <option value="dining">Dining Out</option>
+                                                        <option value="healthcare">Healthcare</option>
+                                                        <option value="insurance">Insurance</option>
+                                                        <option value="debt">Debt Payments</option>
+                                                        <option value="entertainment">Entertainment</option>
+                                                        <option value="personal">Personal Care</option>
+                                                        <option value="education">Education</option>
+                                                        <option value="savings">Savings</option>
+                                                        <option value="gifts">Gifts</option>
+                                                        <option value="subscriptions">Subscriptions</option>
+                                                        <option value="other">Other</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-5">
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" class="form-control expense-amount" placeholder="Amount" min="0" step="0.01">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-1">
+                                                    <button type="button" class="btn btn-danger remove-expense-btn d-none">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="button" id="addExpenseBtn" class="btn btn-outline-danger mt-2">
+                                            <i class="bi bi-plus"></i> Add Expense Category
+                                        </button>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3 bg-light">
+                                    <div class="card-header bg-info text-white">
+                                        <h2 class="h5 mb-0">Budget Summary</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Total Income</label>
+                                                <div class="alert alert-success" role="alert">
+                                                    <strong id="totalIncome">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Total Expenses</label>
+                                                <div class="alert alert-danger" role="alert">
+                                                    <strong id="totalExpenses">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Budget Surplus/Deficit</label>
+                                                <div class="alert" role="alert" id="budgetSurplusAlert">
+                                                    <strong id="budgetSurplus">$0.00</strong>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label">Savings Potential</label>
+                                                <div class="alert alert-info" role="alert">
+                                                    <strong id="savingsPotential">$0.00</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="card mb-3">
+                                    <div class="card-header bg-warning text-dark">
+                                        <h2 class="h5 mb-0">Financial Goals</h2>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Goal Description</label>
+                                                <input type="text" class="form-control" id="financialGoal" placeholder="e.g., Emergency Fund, Vacation">
+                                            </div>
+                                            <div class="col-md-6 mb-2">
+                                                <label class="form-label">Target Amount</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text">$</span>
+                                                    <input type="number" class="form-control" id="goalAmount" min="0" step="0.01">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="mb-3">
+                                    <label class="form-label">Additional Notes</label>
+                                    <textarea class="form-control" rows="4" placeholder="Financial strategies, comments, reminders..."></textarea>
+                                </div>
+                
+                                <div class="text-center">
+                                    <button type="button" id="calculateBtn" class="btn btn-primary btn-lg">
+                                        Save Budget
+                                    </button>
+                                    <button type="button" id="resetBtn" class="btn btn-secondary btn-lg ms-2">
+                                        Reset Form
+                                    </button>
+                                </div>                            
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weekly Budget Section -->
+        <section id="weekly" class="content-section">
+            <div class="container py-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3 mb-0">Weekly Budget Planning Form</h1>
+                    </div>
+                    <div class="card-body">
+                        <form id="weeklyBudgetForm">                            
+                                {% csrf_token %}
+                                <div class="card budget-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">📊 Weekly Income</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Primary Income</label>
+                                                <input type="number" class="form-control" id="primaryIncome" placeholder="Salary/Main Income">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Additional Income</label>
+                                                <input type="number" class="form-control" id="additionalIncome" placeholder="Freelance/Side Gigs">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Total Weekly Income</label>
+                                                <input type="number" class="form-control" id="totalIncome" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- Expense Categories -->
+                                <div class="card budget-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">💸 Weekly Expense Allocation</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Housing/Rent</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="housing">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Utilities</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="utilities">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Groceries</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="groceries">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Transportation</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="transportation">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Entertainment</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="entertainment">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6 expense-category">
+                                                <label class="form-label">Savings/Investments</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control expense-input" placeholder="Amount" data-category="savings">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                
+                                        <div class="progress-container">
+                                            <label class="form-label">Total Expense Allocation</label>
+                                            <div class="progress">
+                                                <div id="expenseProgress" class="progress-bar" role="progressbar" style="width: 0%;">0%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- Savings and Goals -->
+                                <div class="card budget-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">🎯 Weekly Financial Goals</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Emergency Fund Target</label>
+                                                <input type="number" class="form-control" placeholder="Weekly contribution">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Specific Financial Goal</label>
+                                                <input type="text" class="form-control" placeholder="e.g., Vacation Fund, Debt Repayment">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Goal Progress Notes</label>
+                                            <textarea class="form-control" rows="3" placeholder="Track your progress and challenges"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <!-- Summary and Submission -->
+                                <div class="card budget-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">📝 Weekly Budget Summary</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Total Income</label>
+                                                <input type="number" class="form-control" id="summaryIncome" readonly>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Total Expenses</label>
+                                                <input type="number" class="form-control" id="summaryExpenses" readonly>
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Net Surplus/Deficit</label>
+                                                <input type="number" class="form-control" id="summarySurplus" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg" id="weeklySubmitBtn">Save Weekly Budget Plan</button>
+                                </div>                        
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Daily Budget Section -->
+        <section id="daily" class="content-section">
+            <div class="container py-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3 mb-0">Daily Budget Planning Form</h1>
+                    </div>
+                    <div class="card-body">
+                        <form id="dailyBudgetForm">
+                                <!-- Morning Financial Check-In -->
+                                <div class="card financial-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">Morning Financial Check-In</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Daily Budget</label>
+                                                <input type="number" class="form-control" placeholder="Enter daily budget">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Financial Goal for Today</label>
+                                                <input type="text" class="form-control" placeholder="Specific action or target">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Expense Tracking Method</label>
+                                            <select class="form-select">
+                                                <option>Cash</option>
+                                                <option>Debit Card</option>
+                                                <option>Digital Wallet</option>
                                             </select>
                                         </div>
-                                        <div class="col-md-5">
-                                            <input type="number" class="form-control expense-amount" placeholder="Monthly Budget" min="0" step="0.01">
+                                    </div>
+                                
+                            
+                                <!-- Expense Management -->
+                                <div class="card financial-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">Expense Tracking</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Essential Expenses</label>
+                                                <input type="number" class="form-control" placeholder="Amount spent">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Discretionary Expenses</label>
+                                                <input type="number" class="form-control" placeholder="Amount spent">
+                                            </div>
+                                            <div class="col-md-4 mb-3">
+                                                <label class="form-label">Savings Allocation (%)</label>
+                                                <input type="number" class="form-control" min="0" max="100" placeholder="Percentage">
+                                            </div>
                                         </div>
-                                        <div class="col-md-1">
-                                            <button type="button" class="btn btn-danger remove-expense-btn d-none">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
+                                        <div class="mb-3">
+                                            <label class="form-label">Expense Notes</label>
+                                            <textarea class="form-control" rows="3" placeholder="Additional notes about today's expenses"></textarea>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" id="addExpenseBtn" class="btn btn-outline-danger mt-2">
-                                    <i class="bi bi-plus"></i> Add Expense Category
-                                </button>
-                            </div>
-                        </div>
-        
-                        <div class="card mb-3 bg-light">
-                            <div class="card-header bg-info text-white">
-                                <h2 class="h5 mb-0">Budget Summary</h2>
-                            </div>
-                            <div class="card-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-2">
-                                        <label class="form-label">Total Monthly Income</label>
-                                        <div class="alert alert-success" role="alert">
-                                            <strong id="totalIncome">$0.00</strong>
-                                        </div>
+                            
+                                <!-- Evening Reconciliation -->
+                                <div class="card financial-card">
+                                    <div class="card-header section-header">
+                                        <h5 class="mb-0">Evening Financial Review</h5>
                                     </div>
-                                    <div class="col-md-6 mb-2">
-                                        <label class="form-label">Total Monthly Expenses</label>
-                                        <div class="alert alert-danger" role="alert">
-                                            <strong id="totalExpenses">$0.00</strong>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Total Daily Spending</label>
+                                                <input type="number" class="form-control" placeholder="Total expenses today">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Amount Saved Today</label>
+                                                <input type="number" class="form-control" placeholder="Amount transferred to savings">
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Monthly Surplus/Deficit</label>
-                                        <div class="alert" role="alert" id="monthlySurplusAlert">
-                                            <strong id="monthlySurplus">$0.00</strong>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tomorrow's Budget Plan</label>
+                                            <input type="number" class="form-control" placeholder="Planned budget for tomorrow">
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Annual Surplus/Deficit</label>
-                                        <div class="alert" role="alert" id="annualSurplusAlert">
-                                            <strong id="annualSurplus">$0.00</strong>
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input" type="checkbox" id="goalAchieved">
+                                            <label class="form-check-label" for="goalAchieved">
+                                                Daily Financial Goal Achieved
+                                            </label>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-        
-                        <div class="mb-3">
-                            <label class="form-label">Additional Notes</label>
-                            <textarea class="form-control" rows="4" placeholder="Financial goals, comments..."></textarea>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>   
-        </div>
-
-
-
-        <div id="daily" class="container py-5 content-section active">
-            <div class="card shadow-lg">
-                <div class="card-header bg-primary text-white text-center">
-                    <h1 class="h3 mb-0">Daily Budget Planner</h1>
-                </div>
-                <div class="card-body">
-        
-           <form id="dailyFinancePlanForm">
-            <!-- Morning Financial Check-In -->
-            <div class="card financial-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0">Morning Financial Check-In</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Daily Budget</label>
-                            <input type="number" class="form-control" placeholder="Enter daily budget">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Financial Goal for Today</label>
-                            <input type="text" class="form-control" placeholder="Specific action or target">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Expense Tracking Method</label>
-                        <select class="form-select">
-                            <option>Cash</option>
-                            <option>Debit Card</option>
-                            <option>Digital Wallet</option>
-                        </select>
-                    </div>
-                </div>
-            
-        
-            <!-- Expense Management -->
-            <div class="card financial-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0">Expense Tracking</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Essential Expenses</label>
-                            <input type="number" class="form-control" placeholder="Amount spent">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Discretionary Expenses</label>
-                            <input type="number" class="form-control" placeholder="Amount spent">
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Savings Allocation (%)</label>
-                            <input type="number" class="form-control" min="0" max="100" placeholder="Percentage">
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Expense Notes</label>
-                        <textarea class="form-control" rows="3" placeholder="Additional notes about today's expenses"></textarea>
+                            
+                            
+                                <div class="text-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">Save Daily Financial Plan</button>
+                                </div>                            
+                        </form>
                     </div>
                 </div>
             </div>
-        
-            <!-- Evening Reconciliation -->
-            <div class="card financial-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0">Evening Financial Review</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Total Daily Spending</label>
-                            <input type="number" class="form-control" placeholder="Total expenses today">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Amount Saved Today</label>
-                            <input type="number" class="form-control" placeholder="Amount transferred to savings">
-                        </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="content-section">
+            <div class="container py-5">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h1 class="h3 mb-0">Budget History</h1>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">Tomorrow's Budget Plan</label>
-                        <input type="number" class="form-control" placeholder="Planned budget for tomorrow">
-                    </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="goalAchieved">
-                        <label class="form-check-label" for="goalAchieved">
-                            Daily Financial Goal Achieved
-                        </label>
+                    <div class="card-body">
+                        <p>Your budget history will be displayed here.</p>
                     </div>
                 </div>
             </div>
-        
-        
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-lg">Save Daily Financial Plan</button>
-            </div>
-           </form>
-         </div>
-         </div>
-         </div>
-         </div>
-         </div>
-         </div>
-        </div>
-    </section>
-    <script data-dynamic="true">
-        
-        document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('dailyFinancePlanForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    alert('Daily Financial Plan Saved!');
-    });
-document.addEventListener('DOMContentLoaded', () => {
-    const addIncomeBtn = document.getElementById('addIncomeBtn');
-    const addExpenseBtn = document.getElementById('addExpenseBtn');
-    const incomeContainer = document.getElementById('incomeContainer');
-    const expenseContainer = document.getElementById('expenseContainer');
-    const totalIncomeSpan = document.getElementById('totalIncome');
-    const totalExpensesSpan = document.getElementById('totalExpenses');
-    const monthlySurplusSpan = document.getElementById('monthlySurplus');
-    const annualSurplusSpan = document.getElementById('annualSurplus');
-    const monthlySurplusAlert = document.getElementById('monthlySurplusAlert');
-    const annualSurplusAlert = document.getElementById('annualSurplusAlert');
+        </section>
+    </div>
+</div>
 
-// Add income source
-addIncomeBtn.addEventListener('click', () => {
-    const newIncomeItem = document.createElement('div');
-    newIncomeItem.className = 'row income-item mb-2';
-    newIncomeItem.innerHTML = `
-                <div class="col-md-6">
-                    <input type="text" class="form-control income-source" placeholder="Income Source">
-                </div>
-                <div class="col-md-5">
-                    <input type="number" class="form-control income-amount" placeholder="Monthly Amount" min="0" step="0.01">
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger remove-income-btn">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-    `;
-incomeContainer.appendChild(newIncomeItem);
-
-// Add remove functionality to new button
-const removeBtn = newIncomeItem.querySelector('.remove-income-btn');
-removeBtn.addEventListener('click', () => {
-    incomeContainer.removeChild(newIncomeItem);
-    updateSummary();
-});
-
-newIncomeItem.querySelectorAll('input').forEach(input => {
-    input.addEventListener('input', updateSummary);
-});});
-// Add expense categoryaddExpenseBtn.addEventListener('click', () => {
-const newExpenseItem = document.createElement('div');
-newExpenseItem.className = 'row expense-item mb-2';
-newExpenseItem.innerHTML = `
-                <div class="col-md-6">
-                    <select class="form-select expense-category">
-                        <option value="">Select Category</option>
-                        <option value="housing">Housing</option>
-                        <option value="utilities">Utilities</option>
-                        <option value="transportation">Transportation</option>
-                        <option value="food">Food</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="insurance">Insurance</option>
-                        <option value="debt">Debt Payments</option>
-                        <option value="entertainment">Entertainment</option>
-                        <option value="personal">Personal Care</option>
-                        <option value="savings">Savings</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <input type="number" class="form-control expense-amount" placeholder="Monthly Budget" min="0" step="0.01">
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger remove-expense-btn">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-        expenseContainer.appendChild(newExpenseItem);
-
-        // Add remove functionality to new button
-        const removeBtn = newExpenseItem.querySelector('.remove-expense-btn');
-        removeBtn.addEventListener('click', () => {
-                expenseContainer.removeChild(newExpenseItem);
-                updateSummary();
-        });
-
-        newExpenseItem.querySelectorAll('input, select').forEach(input => {
-            input.addEventListener('input', updateSummary);
-        });
-    });
-
-// Update summary calculations
-function updateSummary() {
-    // Calculate total income
-    const incomeAmounts = Array.from(document.querySelectorAll('.income-amount'))
-        .map(input => parseFloat(input.value) || 0);
-    const totalIncome = incomeAmounts.reduce((sum, amount) => sum + amount, 0);
-
-    // Calculate total expenses
-    const expenseAmounts = Array.from(document.querySelectorAll('.expense-amount'))
-        .map(input => parseFloat(input.value) || 0);
-    const totalExpenses = expenseAmounts.reduce((sum, amount) => sum + amount, 0);
-
-    // Calculate surplus/deficit
-    const monthlySurplus = totalIncome - totalExpenses;
-    const annualSurplus = monthlySurplus * 12;
-
-    // Update summary display
-    totalIncomeSpan.textContent = `$${totalIncome.toFixed(2)}`;
-    totalExpensesSpan.textContent = `$${totalExpenses.toFixed(2)}`;
-    monthlySurplusSpan.textContent = `$${monthlySurplus.toFixed(2)}`;
-    annualSurplusSpan.textContent = `$${annualSurplus.toFixed(2)}`;
-
-    // Color code surplus/deficit
-    if (monthlySurplus >= 0) {
-        monthlySurplusAlert.className = 'alert alert-success';
-    } else {
-        monthlySurplusAlert.className = 'alert alert-danger';
-    }
-
-    if (annualSurplus >= 0) {
-        annualSurplusAlert.className = 'alert alert-success';
-    } else {
-        annualSurplusAlert.className = 'alert alert-danger';
-    }
-}
-
-// Initial event listeners
-document.querySelectorAll('.income-amount, .expense-amount').forEach(input => {
-    input.addEventListener('input', updateSummary);
-});
-
-// monthly expenditures
-document.addEventListener('DOMContentLoaded', () => {
-    const periodTypeSelect = document.getElementById('periodType');
-    const addIncomeBtn = document.getElementById('addIncomeBtn');
-    const addExpenseBtn = document.getElementById('addExpenseBtn');
-    const incomeContainer = document.getElementById('incomeContainer');
-    const expenseContainer = document.getElementById('expenseContainer');
-    const totalIncomeSpan = document.getElementById('totalIncome');
-    const totalExpensesSpan = document.getElementById('totalExpenses');
-    const budgetSurplusSpan = document.getElementById('budgetSurplus');
-    const savingsPotentialSpan = document.getElementById('savingsPotential');
-    const budgetSurplusAlert = document.getElementById('budgetSurplusAlert');
-    const calculateBtn = document.getElementById('calculateBtn');
-    const resetBtn = document.getElementById('resetBtn');
-
-    // Period type adjustment
-    periodTypeSelect.addEventListener('change', (e) => {
-        const periodType = e.target.value;
-        const multipliers = {
-                'daily': 30,
-                'weekly': 4,
-                'monthly': 1
-            };
-            
-            document.querySelectorAll('.income-amount, .expense-amount').forEach(input => {
-                const currentValue = parseFloat(input.value) || 0;
-                const currentMultiplier = parseFloat(input.dataset.multiplier) || 1;
-                const newMultiplier = multipliers[periodType];
-                
-                input.value = (currentValue / currentMultiplier * newMultiplier).toFixed(2);
-                input.dataset.multiplier = newMultiplier;
+<script>
+    (function() {
+        // Debug: Log that the script is running
+        console.log('Budget App Navigation Script Loaded');
+    
+        // Utility function to get CSRF token (moved outside of nested function)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    
+        // Select key elements
+        const navContainer = document.getElementById('choices');
+        const navItems = document.querySelectorAll('#choices .items');
+        const contentSections = document.querySelectorAll('.content-section');
+    
+        // Debug: Log elements found
+        console.log('Nav Container:', navContainer);
+        console.log('Nav Items:', navItems.length);
+        console.log('Content Sections:', contentSections.length);
+    
+        // Function to show the default section (Annual)
+        function showDefaultSection() {
+            // Hide all sections first
+            contentSections.forEach(section => {
+                section.classList.remove('active');
+                console.log(`Hiding section: ${section.id}`);
             });
-
-            updateSummary();
-        });
-
-        // Add income source
-        addIncomeBtn.addEventListener('click', () => {
-            const newIncomeItem = document.createElement('div');
-            newIncomeItem.className = 'row income-item mb-2';
-            newIncomeItem.innerHTML = `
-                <div class="col-md-6">
-                    <input type="text" class="form-control income-source" placeholder="Income Source (e.g., Salary, Freelance)">
-                </div>
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control income-amount" placeholder="Amount" min="0" step="0.01" data-multiplier="1">
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger remove-income-btn">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-            incomeContainer.appendChild(newIncomeItem);
-
-            const removeBtn = newIncomeItem.querySelector('.remove-income-btn');
-            removeBtn.addEventListener('click', () => {
-                incomeContainer.removeChild(newIncomeItem);
-                updateSummary();
+    
+            // Show Annual section
+            const annualSection = document.getElementById('annually');
+            if (annualSection) {
+                annualSection.classList.add('active');
+                console.log('Showing Annual section');
+            } else {
+                console.error('Annual section not found!');
+            }
+    
+            // Highlight corresponding nav item
+            const annualNavItem = Array.from(navItems).find(item => 
+                item.getAttribute('data-page') === 'annually'
+            );
+            if (annualNavItem) {
+                annualNavItem.classList.add('active-nav');
+            }
+        }
+    
+        // Function to handle navigation
+        function handleNavigation(event) {
+            // Ensure we're clicking on a nav item
+            const navItem = event.target.closest('.items');
+            if (!navItem) return;
+    
+            console.log('Nav item clicked:', navItem);
+    
+            // Get the target section
+            const pageId = navItem.getAttribute('data-page');
+            const targetSection = document.getElementById(pageId);
+    
+            // Debug logging
+            console.log('Target Page ID:', pageId);
+            console.log('Target Section:', targetSection);
+    
+            // Hide all sections
+            contentSections.forEach(section => {
+                section.classList.remove('active');
             });
-
-            newIncomeItem.querySelectorAll('input').forEach(input => {
-                input.addEventListener('input', updateSummary);
+    
+            // Remove active styling from all nav items
+            navItems.forEach(item => {
+                item.classList.remove('active-nav');
             });
-        });
-
-        // Add expense category
-        addExpenseBtn.addEventListener('click', () => {
-            const newExpenseItem = document.createElement('div');
-            newExpenseItem.className = 'row expense-item mb-2';
-            newExpenseItem.innerHTML = `
-                <div class="col-md-6">
-                    <select class="form-select expense-category">
-                        <option value="">Select Expense Category</option>
-                        <option value="housing">Housing/Rent</option>
-                        <option value="utilities">Utilities</option>
-                        <option value="transportation">Transportation</option>
-                        <option value="food">Food</option>
-                        <option value="groceries">Groceries</option>
-                        <option value="dining">Dining Out</option>
-                        <option value="healthcare">Healthcare</option>
-                        <option value="insurance">Insurance</option>
-                        <option value="debt">Debt Payments</option>
-                        <option value="entertainment">Entertainment</option>
-                        <option value="personal">Personal Care</option>
-                        <option value="education">Education</option>
-                        <option value="savings">Savings</option>
-                        <option value="gifts">Gifts</option>
-                        <option value="subscriptions">Subscriptions</option>
-                        <option value="other">Other</option>
-                    </select>
-                </div>
-                <div class="col-md-5">
-                    <div class="input-group">
-                        <span class="input-group-text">$</span>
-                        <input type="number" class="form-control expense-amount" placeholder="Amount" min="0" step="0.01" data-multiplier="1">
-                    </div>
-                </div>
-                <div class="col-md-1">
-                    <button type="button" class="btn btn-danger remove-expense-btn">
-                        <i class="bi bi-trash"></i>
-                    </button>
-                </div>
-            `;
-            expenseContainer.appendChild(newExpenseItem);
-
-            const removeBtn = newExpenseItem.querySelector('.remove-expense-btn');
-            removeBtn.addEventListener('click', () => {
-                expenseContainer.removeChild(newExpenseItem);
-                updateSummary();
-            });
-
-            newExpenseItem.querySelectorAll('input, select').forEach(input => {
-                input.addEventListener('input', updateSummary);
-            });
-        });});
-
-        // Reset form
-        resetBtn.addEventListener('click', () => {
-            document.querySelectorAll('input').value='';
-        })
-
-
-        document.addEventListener('DOMContentLoaded', function() {
+    
+            // Show target section
+            if (targetSection) {
+                targetSection.classList.add('active');
+                navItem.classList.add('active-nav');
+            }
+        }
+    
+        // Add event listener to navigation container (event delegation)
+        if (navContainer) {
+            navContainer.addEventListener('click', handleNavigation);
+        } else {
+            console.error('Navigation container not found!');
+        }
+    
+        // Show default section on page load
+        showDefaultSection();
+    
+        // Corrected function name and added proper event listeners
+        function attachWeeklyEventListener() {
+            // Income Input Elements
             const primaryIncomeInput = document.getElementById('primaryIncome');
             const additionalIncomeInput = document.getElementById('additionalIncome');
             const totalIncomeInput = document.getElementById('totalIncome');
+        
+            // Expense Input Elements
             const expenseInputs = document.querySelectorAll('.expense-input');
             const expenseProgress = document.getElementById('expenseProgress');
+        
+            // Summary Elements
             const summaryIncomeInput = document.getElementById('summaryIncome');
             const summaryExpensesInput = document.getElementById('summaryExpenses');
             const summarySurplusInput = document.getElementById('summarySurplus');
-
+        
+            // Function to calculate total income
             function calculateTotalIncome() {
                 const primaryIncome = parseFloat(primaryIncomeInput.value) || 0;
                 const additionalIncome = parseFloat(additionalIncomeInput.value) || 0;
                 const totalIncome = primaryIncome + additionalIncome;
-                
-                totalIncomeInput.value = totalIncome;
-                summaryIncomeInput.value = totalIncome;
+        
+                totalIncomeInput.value = totalIncome.toFixed(2);
+                summaryIncomeInput.value = totalIncome.toFixed(2);
+        
                 return totalIncome;
             }
-
+        
+            // Function to calculate expense allocation
             function calculateExpenseAllocation() {
                 const totalIncome = calculateTotalIncome();
                 let totalExpensePercentage = 0;
-
+                let totalExpenseAmount = 0;
+        
                 expenseInputs.forEach(input => {
                     const percentage = parseFloat(input.value) || 0;
                     totalExpensePercentage += percentage;
+                    
+                    // Calculate expense amount for each category
+                    const expenseAmount = totalIncome * (percentage / 100);
+                    input.setAttribute('data-amount', expenseAmount.toFixed(2));
                 });
-
+        
+                // Update expense progress bar
                 expenseProgress.style.width = `${totalExpensePercentage}%`;
                 expenseProgress.textContent = `${totalExpensePercentage}%`;
-
-                const totalExpenses = totalIncome * (totalExpensePercentage / 100);
-                summaryExpensesInput.value = totalExpenses.toFixed(2);
-                
-                const netSurplus = totalIncome - totalExpenses;
+                expenseProgress.classList.toggle('bg-danger', totalExpensePercentage > 100);
+        
+                // Calculate total expenses
+                totalExpenseAmount = totalIncome * (totalExpensePercentage / 100);
+                summaryExpensesInput.value = totalExpenseAmount.toFixed(2);
+        
+                // Calculate surplus
+                const netSurplus = totalIncome - totalExpenseAmount;
                 summarySurplusInput.value = netSurplus.toFixed(2);
-
-                return totalExpensePercentage;
+        
+                return {
+                    totalExpensePercentage,
+                    totalExpenseAmount,
+                    netSurplus
+                };
             }
-
-            primaryIncomeInput.addEventListener('input', calculateExpenseAllocation);
-            additionalIncomeInput.addEventListener('input', calculateExpenseAllocation);
-            
+        
+            // Add event listeners for real-time calculations
+            [primaryIncomeInput, additionalIncomeInput].forEach(input => {
+                input.addEventListener('input', calculateTotalIncome);
+            });
+        
             expenseInputs.forEach(input => {
                 input.addEventListener('input', calculateExpenseAllocation);
             });
-
-            document.getElementById('weeklyBudgetForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                if (calculateExpenseAllocation() > 100) {
-                    alert('Total expense allocation cannot exceed 100%!');
-                } else {
-                    alert('Weekly Budget Plan Saved Successfully!');
-                }
-            });
-        });
         
-
-
-
-        document.getElementById('dailyFinancePlanForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Daily Financial Plan Saved!');
-            });
-        document.addEventListener('DOMContentLoaded', () => {
-            const addIncomeBtn = document.getElementById('addIncomeBtn');
-            const addExpenseBtn = document.getElementById('addExpenseBtn');
-            const incomeContainer = document.getElementById('incomeContainer');
-            const expenseContainer = document.getElementById('expenseContainer');
-            const totalIncomeSpan = document.getElementById('totalIncome');
-            const totalExpensesSpan = document.getElementById('totalExpenses');
-            const monthlySurplusSpan = document.getElementById('monthlySurplus');
-            const annualSurplusSpan = document.getElementById('annualSurplus');
-            const monthlySurplusAlert = document.getElementById('monthlySurplusAlert');
-            const annualSurplusAlert = document.getElementById('annualSurplusAlert');
-        
-        // Add income source
-        addIncomeBtn.addEventListener('click', () => {
-            const newIncomeItem = document.createElement('div');
-            newIncomeItem.className = 'row income-item mb-2';
-            newIncomeItem.innerHTML = `
-                        <div class="col-md-6">
-                            <input type="text" class="form-control income-source" placeholder="Income Source">
-                        </div>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control income-amount" placeholder="Monthly Amount" min="0" step="0.01">
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-income-btn">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-            `;
-        incomeContainer.appendChild(newIncomeItem);
-        
-        // Add remove functionality to new button
-        const removeBtn = newIncomeItem.querySelector('.remove-income-btn');
-        removeBtn.addEventListener('click', () => {
-            incomeContainer.removeChild(newIncomeItem);
-            updateSummary();
-        });
-        
-        newIncomeItem.querySelectorAll('input').forEach(input => {
-            input.addEventListener('input', updateSummary);
-        });});
-        // Add expense categoryaddExpenseBtn.addEventListener('click', () => {
-        const newExpenseItem = document.createElement('div');
-        newExpenseItem.className = 'row expense-item mb-2';
-        newExpenseItem.innerHTML = `
-                        <div class="col-md-6">
-                            <select class="form-select expense-category">
-                                <option value="">Select Category</option>
-                                <option value="housing">Housing</option>
-                                <option value="utilities">Utilities</option>
-                                <option value="transportation">Transportation</option>
-                                <option value="food">Food</option>
-                                <option value="healthcare">Healthcare</option>
-                                <option value="insurance">Insurance</option>
-                                <option value="debt">Debt Payments</option>
-                                <option value="entertainment">Entertainment</option>
-                                <option value="personal">Personal Care</option>
-                                <option value="savings">Savings</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control expense-amount" placeholder="Monthly Budget" min="0" step="0.01">
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-expense-btn">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                expenseContainer.appendChild(newExpenseItem);
-        
-                // Add remove functionality to new button
-                const removeBtn = newExpenseItem.querySelector('.remove-expense-btn');
-                removeBtn.addEventListener('click', () => {
-                        expenseContainer.removeChild(newExpenseItem);
-                        updateSummary();
+            
+            function submitWeeklyBudget(formData) {        
+                fetch('create_weekly_budget', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') 
+                    },
+                    body: JSON.stringify(formData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    console.log(response)
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Reset all input fields
+                        primaryIncomeInput.value = '';
+                        additionalIncomeInput.value = '';
+                        totalIncomeInput.value = '';
+                        summaryIncomeInput.value = '';
+                        summaryExpensesInput.value = '';
+                        summarySurplusInput.value = '';
+            
+                        // Reset expense inputs
+                        document.querySelectorAll('.expense-input').forEach(input => {
+                            input.value = '';
+                            input.removeAttribute('data-amount');
+                        });
+            
+                        // Reset expense progress bar
+                        expenseProgress.style.width = '0%';
+                        expenseProgress.textContent = '0%';
+                        expenseProgress.classList.remove('bg-danger');
+            
+                        // Show success message
+                        alert(data.message || 'Weekly budget saved successfully');
+                    } else {
+                        // Handle unsuccessful submission
+                        alert(data.message || 'Failed to save weekly budget');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Unable to save weekly budget. Please try again.');
                 });
-        
-                newExpenseItem.querySelectorAll('input, select').forEach(input => {
-                    input.addEventListener('input', updateSummary);
-                });
-            });
-        
-        // Update summary calculations
-        function updateSummary() {
-            // Calculate total income
-            const incomeAmounts = Array.from(document.querySelectorAll('.income-amount'))
-                .map(input => parseFloat(input.value) || 0);
-            const totalIncome = incomeAmounts.reduce((sum, amount) => sum + amount, 0);
-        
-            // Calculate total expenses
-            const expenseAmounts = Array.from(document.querySelectorAll('.expense-amount'))
-                .map(input => parseFloat(input.value) || 0);
-            const totalExpenses = expenseAmounts.reduce((sum, amount) => sum + amount, 0);
-        
-            // Calculate surplus/deficit
-            const monthlySurplus = totalIncome - totalExpenses;
-            const annualSurplus = monthlySurplus * 12;
-        
-            // Update summary display
-            totalIncomeSpan.textContent = `$${totalIncome.toFixed(2)}`;
-            totalExpensesSpan.textContent = `$${totalExpenses.toFixed(2)}`;
-            monthlySurplusSpan.textContent = `$${monthlySurplus.toFixed(2)}`;
-            annualSurplusSpan.textContent = `$${annualSurplus.toFixed(2)}`;
-        
-            // Color code surplus/deficit
-            if (monthlySurplus >= 0) {
-                monthlySurplusAlert.className = 'alert alert-success';
-            } else {
-                monthlySurplusAlert.className = 'alert alert-danger';
             }
-        
-            if (annualSurplus >= 0) {
-                annualSurplusAlert.className = 'alert alert-success';
-            } else {
-                annualSurplusAlert.className = 'alert alert-danger';
+            
+            // Modify the form submission event listener
+            const weeklyBudgetForm = document.getElementById('weeklyBudgetForm');
+            if (weeklyBudgetForm) {
+                weeklyBudgetForm.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    
+                    // Validate expense percentage
+                    const expenseAllocation = calculateExpenseAllocation();
+                    
+                    if (expenseAllocation.totalExpensePercentage > 100) {
+                        alert('Total expense allocation cannot exceed 100%');
+                        return;
+                    }
+            
+                    // Collect form data
+                    const formData = {
+                        primary_income: primaryIncomeInput.value,
+                        additional_income: additionalIncomeInput.value,
+                        total_income: totalIncomeInput.value,
+                        housing_expense: document.querySelector('[data-category="housing"]').value,
+                        utilities_expense: document.querySelector('[data-category="utilities"]').value,
+                        groceries_expense: document.querySelector('[data-category="groceries"]').value,
+                        transportation_expense: document.querySelector('[data-category="transportation"]').value,
+                        entertainment_expense: document.querySelector('[data-category="entertainment"]').value,
+                        savings_expense: document.querySelector('[data-category="savings"]').value,
+                        total_expense: summaryExpensesInput.value,
+                        net_surplus: summarySurplusInput.value
+                    };
+            
+                    // Submit the weekly budget
+                    submitWeeklyBudget(formData);
+                });
             }
         }
+    
+        // Call the weekly event listener setup when the script loads
+        attachWeeklyEventListener();
+
+        // daily frontend script 
+        const attachDailyEventListener = () => {
+            const form = document.getElementById('dailyBudgetForm');
+            const inputs = form.querySelectorAll('input, select, textarea');
         
-        // Initial event listeners
-        document.querySelectorAll('.income-amount, .expense-amount').forEach(input => {
-            input.addEventListener('input', updateSummary);
-        });
+            // Real-time calculation function
+            function calculateFinancials() {
+                // Morning Financial Check-In
+                const dailyBudget = parseFloat(form.querySelector('input[placeholder="Enter daily budget"]').value) || 0;
+                const financialGoal = form.querySelector('input[placeholder="Specific action or target"]').value;
+                const expenseTrackingMethod = form.querySelector('.form-select').value;
         
-        // monthly expenditures
-        document.addEventListener('DOMContentLoaded', () => {
-            const periodTypeSelect = document.getElementById('periodType');
-            const addIncomeBtn = document.getElementById('addIncomeBtn');
-            const addExpenseBtn = document.getElementById('addExpenseBtn');
-            const incomeContainer = document.getElementById('incomeContainer');
-            const expenseContainer = document.getElementById('expenseContainer');
-            const totalIncomeSpan = document.getElementById('totalIncome');
-            const totalExpensesSpan = document.getElementById('totalExpenses');
-            const budgetSurplusSpan = document.getElementById('budgetSurplus');
-            const savingsPotentialSpan = document.getElementById('savingsPotential');
-            const budgetSurplusAlert = document.getElementById('budgetSurplusAlert');
-            const calculateBtn = document.getElementById('calculateBtn');
-            const resetBtn = document.getElementById('resetBtn');
+                // Expense Management
+                const essentialExpenses = parseFloat(form.querySelectorAll('input[placeholder="Amount spent"]')[0].value) || 0;
+                const discretionaryExpenses = parseFloat(form.querySelectorAll('input[placeholder="Amount spent"]')[1].value) || 0;
+                const savingsAllocation = parseFloat(form.querySelector('input[placeholder="Percentage"]').value) || 0;
+                const expenseNotes = form.querySelector('textarea').value;
         
-            // Period type adjustment
-            periodTypeSelect.addEventListener('change', (e) => {
-                const periodType = e.target.value;
-                const multipliers = {
-                        'daily': 30,
-                        'weekly': 4,
-                        'monthly': 1
-                    };
-                    
-                    document.querySelectorAll('.income-amount, .expense-amount').forEach(input => {
-                        const currentValue = parseFloat(input.value) || 0;
-                        const currentMultiplier = parseFloat(input.dataset.multiplier) || 1;
-                        const newMultiplier = multipliers[periodType];
-                        
-                        input.value = (currentValue / currentMultiplier * newMultiplier).toFixed(2);
-                        input.dataset.multiplier = newMultiplier;
-                    });
+                // Evening Reconciliation
+                const totalDailySpending = parseFloat(form.querySelectorAll('input[placeholder="Total expenses today"]')[0].value) || 0;
+                const amountSaved = parseFloat(form.querySelectorAll('input[placeholder="Amount transferred to savings"]')[0].value) || 0;
+                const tomorrowBudgetPlan = parseFloat(form.querySelector('input[placeholder="Planned budget for tomorrow"]').value) || 0;
+                const goalAchieved = form.querySelector('#goalAchieved').checked;
         
-                    updateSummary();
-                });
+                // Additional calculations
+                const remainingBudget = dailyBudget - (essentialExpenses + discretionaryExpenses);
+                const savingsAmount = dailyBudget * (savingsAllocation / 100);
         
-                // Add income source
-                addIncomeBtn.addEventListener('click', () => {
-                    const newIncomeItem = document.createElement('div');
-                    newIncomeItem.className = 'row income-item mb-2';
-                    newIncomeItem.innerHTML = `
-                        <div class="col-md-6">
-                            <input type="text" class="form-control income-source" placeholder="Income Source (e.g., Salary, Freelance)">
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control income-amount" placeholder="Amount" min="0" step="0.01" data-multiplier="1">
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-income-btn">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    incomeContainer.appendChild(newIncomeItem);
+                // Update UI with calculations (optional)
+                updateCalculationDisplay(remainingBudget, savingsAmount);
+            }
         
-                    const removeBtn = newIncomeItem.querySelector('.remove-income-btn');
-                    removeBtn.addEventListener('click', () => {
-                        incomeContainer.removeChild(newIncomeItem);
-                        updateSummary();
-                    });
+            // Update display with calculations
+            function updateCalculationDisplay(remainingBudget, savingsAmount) {
+                // You can add more complex UI updates here
+                console.log(`Remaining Budget: $${remainingBudget.toFixed(2)}`);
+                console.log(`Savings Amount: $${savingsAmount.toFixed(2)}`);
+            }
         
-                    newIncomeItem.querySelectorAll('input').forEach(input => {
-                        input.addEventListener('input', updateSummary);
-                    });
-                });
+            // Event listeners for real-time calculations
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateFinancials);
+                input.addEventListener('change', calculateFinancials);
+            });
         
-                // Add expense category
-                addExpenseBtn.addEventListener('click', () => {
-                    const newExpenseItem = document.createElement('div');
-                    newExpenseItem.className = 'row expense-item mb-2';
-                    newExpenseItem.innerHTML = `
-                        <div class="col-md-6">
-                            <select class="form-select expense-category">
-                                <option value="">Select Expense Category</option>
-                                <option value="housing">Housing/Rent</option>
-                                <option value="utilities">Utilities</option>
-                                <option value="transportation">Transportation</option>
-                                <option value="food">Food</option>
-                                <option value="groceries">Groceries</option>
-                                <option value="dining">Dining Out</option>
-                                <option value="healthcare">Healthcare</option>
-                                <option value="insurance">Insurance</option>
-                                <option value="debt">Debt Payments</option>
-                                <option value="entertainment">Entertainment</option>
-                                <option value="personal">Personal Care</option>
-                                <option value="education">Education</option>
-                                <option value="savings">Savings</option>
-                                <option value="gifts">Gifts</option>
-                                <option value="subscriptions">Subscriptions</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="input-group">
-                                <span class="input-group-text">$</span>
-                                <input type="number" class="form-control expense-amount" placeholder="Amount" min="0" step="0.01" data-multiplier="1">
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="button" class="btn btn-danger remove-expense-btn">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    expenseContainer.appendChild(newExpenseItem);
+            // Form submission handler
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
         
-                    const removeBtn = newExpenseItem.querySelector('.remove-expense-btn');
-                    removeBtn.addEventListener('click', () => {
-                        expenseContainer.removeChild(newExpenseItem);
-                        updateSummary();
-                    });
+                // Gather form data
+                const formData = {
+                    dailyBudget: parseFloat(form.querySelector('input[placeholder="Enter daily budget"]').value) || 0,
+                    financialGoal: form.querySelector('input[placeholder="Specific action or target"]').value,
+                    expenseTrackingMethod: form.querySelector('.form-select').value,
+                    essentialExpenses: parseFloat(form.querySelectorAll('input[placeholder="Amount spent"]')[0].value) || 0,
+                    discretionaryExpenses: parseFloat(form.querySelectorAll('input[placeholder="Amount spent"]')[1].value) || 0,
+                    savingsAllocation: parseFloat(form.querySelector('input[placeholder="Percentage"]').value) || 0,
+                    expenseNotes: form.querySelector('textarea').value,
+                    totalDailySpending: parseFloat(form.querySelectorAll('input[placeholder="Total expenses today"]')[0].value) || 0,
+                    amountSaved: parseFloat(form.querySelectorAll('input[placeholder="Amount transferred to savings"]')[0].value) || 0,
+                    tomorrowBudgetPlan: parseFloat(form.querySelector('input[placeholder="Planned budget for tomorrow"]').value) || 0,
+                    goalAchieved: form.querySelector('#goalAchieved').checked
+                };
         
-                    newExpenseItem.querySelectorAll('input, select').forEach(input => {
-                        input.addEventListener('input', updateSummary);
-                    });
-                });});
-        
-                // Reset form
-                resetBtn.addEventListener('click', () => {
-                    document.querySelectorAll('input').value='';
+                // Send data to backend
+                fetch('/create_daily_budget/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(formData)
                 })
-        
-        
-                document.addEventListener('DOMContentLoaded', function() {
-                    const primaryIncomeInput = document.getElementById('primaryIncome');
-                    const additionalIncomeInput = document.getElementById('additionalIncome');
-                    const totalIncomeInput = document.getElementById('totalIncome');
-                    const expenseInputs = document.querySelectorAll('.expense-input');
-                    const expenseProgress = document.getElementById('expenseProgress');
-                    const summaryIncomeInput = document.getElementById('summaryIncome');
-                    const summaryExpensesInput = document.getElementById('summaryExpenses');
-                    const summarySurplusInput = document.getElementById('summarySurplus');
-        
-                    function calculateTotalIncome() {
-                        const primaryIncome = parseFloat(primaryIncomeInput.value) || 0;
-                        const additionalIncome = parseFloat(additionalIncomeInput.value) || 0;
-                        const totalIncome = primaryIncome + additionalIncome;
-                        
-                        totalIncomeInput.value = totalIncome;
-                        summaryIncomeInput.value = totalIncome;
-                        return totalIncome;
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Daily budget saved successfully!');
+                        form.reset(); 
+                    } else {
+                        alert('Error: ' + data.message);
                     }
-        
-                    function calculateExpenseAllocation() {
-                        const totalIncome = calculateTotalIncome();
-                        let totalExpensePercentage = 0;
-        
-                        expenseInputs.forEach(input => {
-                            const percentage = parseFloat(input.value) || 0;
-                            totalExpensePercentage += percentage;
-                        });
-        
-                        expenseProgress.style.width = `${totalExpensePercentage}%`;
-                        expenseProgress.textContent = `${totalExpensePercentage}%`;
-        
-                        const totalExpenses = totalIncome * (totalExpensePercentage / 100);
-                        summaryExpensesInput.value = totalExpenses.toFixed(2);
-                        
-                        const netSurplus = totalIncome - totalExpenses;
-                        summarySurplusInput.value = netSurplus.toFixed(2);
-        
-                        return totalExpensePercentage;
-                    }
-        
-                    primaryIncomeInput.addEventListener('input', calculateExpenseAllocation);
-                    additionalIncomeInput.addEventListener('input', calculateExpenseAllocation);
-                    
-                    expenseInputs.forEach(input => {
-                        input.addEventListener('input', calculateExpenseAllocation);
-                    });
-        
-                    document.getElementById('weeklyBudgetForm').addEventListener('submit', function(e) {
-                        e.preventDefault();
-                        if (calculateExpenseAllocation() > 100) {
-                            alert('Total expense allocation cannot exceed 100%!');
-                        } else {
-                            alert('Weekly Budget Plan Saved Successfully!');
-                        }
-                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while saving the budget.');
                 });
             });
-                    
-    </script>
-</div>
+        }
     
+        attachDailyEventListener();
+
+
+        // monthly script
+        const attachMonthlyEventListener = () => {
+                const form = document.getElementById('monthlyBudgetForm');
+                const calculateBtn = document.getElementById('calculateBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                const addIncomeBtn = document.getElementById('addIncomeBtn');
+                const addExpenseBtn = document.getElementById('addExpenseBtn');
+                const incomeContainer = document.getElementById('incomeContainer');
+                const expenseContainer = document.getElementById('expenseContainer');
+            
+                             
+            
+                // Dynamic Income Source Addition
+                addIncomeBtn.addEventListener('click', function() {
+                    console.log('clicked');
+                    const newIncomeItem = document.querySelector('.income-item').cloneNode(true);
+                    
+                    // Clear input values
+                    newIncomeItem.querySelector('.income-source').value = '';
+                    newIncomeItem.querySelector('.income-amount').value = '';
+                    
+                    // Show remove button
+                    const removeBtn = newIncomeItem.querySelector('.remove-income-btn');
+                    removeBtn.classList.remove('d-none');
+                    
+                    // Add event listener to remove button
+                    removeBtn.addEventListener('click', function() {
+                        newIncomeItem.remove();
+                        calculateBudget();
+                    });
+                    
+                    incomeContainer.appendChild(newIncomeItem);
+                });
+            
+                // Dynamic Expense Category Addition
+                addExpenseBtn.addEventListener('click', function() {
+                    const newExpenseItem = document.querySelector('.expense-item').cloneNode(true);
+                    
+                    // Clear input values
+                    newExpenseItem.querySelector('.expense-category').selectedIndex = 0;
+                    newExpenseItem.querySelector('.expense-amount').value = '';
+                    
+                    // Show remove button
+                    const removeBtn = newExpenseItem.querySelector('.remove-expense-btn');
+                    removeBtn.classList.remove('d-none');
+                    
+                    // Add event listener to remove button
+                    removeBtn.addEventListener('click', function() {
+                        newExpenseItem.remove();
+                        calculateBudget();
+                    });
+                    
+                    expenseContainer.appendChild(newExpenseItem);
+                });
+            
+                // Budget Calculation Function
+                function calculateBudget() {
+                    // Calculate Total Income
+                    const incomeItems = document.querySelectorAll('.income-item');
+                    let totalIncome = 0;
+                    incomeItems.forEach(item => {
+                        const amount = parseFloat(item.querySelector('.income-amount').value) || 0;
+                        totalIncome += amount;
+                    });
+                    document.getElementById('totalIncome').textContent = `$${totalIncome.toFixed(2)}`;
+            
+                    // Calculate Total Expenses
+                    const expenseItems = document.querySelectorAll('.expense-item');
+                    let totalExpenses = 0;
+                    expenseItems.forEach(item => {
+                        const amount = parseFloat(item.querySelector('.expense-amount').value) || 0;
+                        totalExpenses += amount;
+                    });
+                    document.getElementById('totalExpenses').textContent = `$${totalExpenses.toFixed(2)}`;
+            
+                    // Calculate Budget Surplus/Deficit
+                    const budgetSurplus = totalIncome - totalExpenses;
+                    const budgetSurplusEl = document.getElementById('budgetSurplus');
+                    const budgetSurplusAlert = document.getElementById('budgetSurplusAlert');
+                    budgetSurplusEl.textContent = `$${budgetSurplus.toFixed(2)}`;
+                    
+                    // Color-code surplus/deficit
+                    if (budgetSurplus > 0) {
+                        budgetSurplusAlert.className = 'alert alert-success';
+                    } else if (budgetSurplus < 0) {
+                        budgetSurplusAlert.className = 'alert alert-danger';
+                    } else {
+                        budgetSurplusAlert.className = 'alert alert-secondary';
+                    }
+            
+                    // Savings Potential
+                    const goalAmount = parseFloat(document.getElementById('goalAmount').value) || 0;
+                    const savingsPotential = Math.min(budgetSurplus, goalAmount);
+                    document.getElementById('savingsPotential').textContent = `$${savingsPotential.toFixed(2)}`;
+                }
+            
+                // Real-time calculation on input changes
+                form.addEventListener('input', calculateBudget);
+            
+                // Reset Form Functionality
+                resetBtn.addEventListener('click', function() {
+                    // Reset form and remove dynamically added items
+                    form.reset();
+                    
+                    // Remove extra income and expense items
+                    const extraIncomeItems = document.querySelectorAll('.income-item:not(:first-child)');
+                    extraIncomeItems.forEach(item => item.remove());
+                    
+                    const extraExpenseItems = document.querySelectorAll('.expense-item:not(:first-child)');
+                    extraExpenseItems.forEach(item => item.remove());
+                    
+                    // Reset summary sections
+                    document.getElementById('totalIncome').textContent = '$0.00';
+                    document.getElementById('totalExpenses').textContent = '$0.00';
+                    document.getElementById('budgetSurplus').textContent = '$0.00';
+                    document.getElementById('budgetSurplusAlert').className = 'alert';
+                    document.getElementById('savingsPotential').textContent = '$0.00';
+                });
+            
+                // Submit Budget Data
+                calculateBtn.addEventListener('click', function() {
+                    // Collect form data
+                    const formData = {
+                        month: document.getElementById('monthSelect').value,
+                        year: document.getElementById('yearInput').value,
+                        period_type: document.getElementById('periodType').value,
+                        
+                        // Collect Income Sources
+                        income_sources: Array.from(document.querySelectorAll('.income-item')).map(item => ({
+                            source: item.querySelector('.income-source').value,
+                            amount: parseFloat(item.querySelector('.income-amount').value) || 0
+                        })),
+                        
+                        // Collect Expense Categories
+                        expense_categories: Array.from(document.querySelectorAll('.expense-item')).map(item => ({
+                            category: item.querySelector('.expense-category').value,
+                            amount: parseFloat(item.querySelector('.expense-amount').value) || 0
+                        })),
+                        
+                        // Additional Details
+                        total_income: parseFloat(document.getElementById('totalIncome').textContent.replace('$', '')) || 0,
+                        total_expenses: parseFloat(document.getElementById('totalExpenses').textContent.replace('$', '')) || 0,
+                        budget_surplus: parseFloat(document.getElementById('budgetSurplus').textContent.replace('$', '')) || 0,
+                        
+                        // Financial Goal
+                        financial_goal: document.getElementById('financialGoal').value,
+                        goal_amount: parseFloat(document.getElementById('goalAmount').value) || 0,
+                        
+                        // Additional Notes
+                        additional_notes: document.querySelector('textarea').value
+                    };
+            
+                    // Send data to backend
+                    fetch('/create_monthly_budget/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert('Monthly budget saved successfully!');
+                            
+                        } else {
+                            alert('Error: ' + (data.message || 'Failed to save budget'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving the budget.');
+                    });
+                });
+            
+        }
+
+
+        attachMonthlyEventListener();
+        const attachAnnualEventListener = () =>{
+            const form = document.getElementById('annualBudgetForm');
+            const incomeContainer = document.getElementById('incomeContainerAnnually');
+            const expenseContainer = document.getElementById('expenseContainerAnnually');
+            const addIncomeButton = document.getElementById('addIncomeButton');
+            const addExpenseButton = document.getElementById('addExpenseButton');
+            const totalIncomeElement = document.getElementById('totalIncome');
+            const totalExpensesElement = document.getElementById('totalExpenses');
+            const monthlySurplusElement = document.getElementById('monthlySurplus');
+            const annualSurplusElement = document.getElementById('annualSurplus');
+            const monthlySurplusAlert = document.getElementById('monthlySurplusAlert');
+            const annualSurplusAlert = document.getElementById('annualSurplusAlert');
+            const saveButton = document.getElementById('annualSaveBtn');
+            const clearButton = document.getElementById('annualClearBtn');
+
+            // Dynamic Income Sources
+            addIncomeButton.addEventListener('click', () => {
+            const newIncomeItem = incomeContainer.querySelector('.income-item').cloneNode(true);
+        
+            // Clear input values
+            newIncomeItem.querySelector('.income-source').value = '';
+            newIncomeItem.querySelector('.income-amount').value = '';
+        
+            // Show remove button
+            const removeButton = newIncomeItem.querySelector('.remove-income-btn');
+            removeButton.classList.remove('d-none');
+        
+            // Add remove event listener
+            removeButton.addEventListener('click', () => {
+                newIncomeItem.remove();
+                calculateTotals();
+            });
+        
+            incomeContainer.appendChild(newIncomeItem);
+            attachCalculationListeners();
+        });
+
+        // Dynamic Expense Categories
+        addExpenseButton.addEventListener('click', () => {
+            const newExpenseItem = expenseContainer.querySelector('.expense-item').cloneNode(true);
+        
+            // Reset select and input
+            newExpenseItem.querySelector('.expense-category').selectedIndex = 0;
+            newExpenseItem.querySelector('.expense-amount').value = '';
+        
+            // Show remove button
+            const removeButton = newExpenseItem.querySelector('.remove-expense-btn');
+            removeButton.classList.remove('d-none');
+        
+            // Add remove event listener
+            removeButton.addEventListener('click', () => {
+                newExpenseItem.remove();
+                calculateTotals();
+            });
+        
+            expenseContainer.appendChild(newExpenseItem);
+            attachCalculationListeners();
+        });
+
+        // Attach listeners for dynamic calculation
+        function attachCalculationListeners() {
+            const incomeAmounts = document.querySelectorAll('.income-amount');
+            const expenseAmounts = document.querySelectorAll('.expense-amount');
+        
+            [...incomeAmounts, ...expenseAmounts].forEach(input => {
+            input.addEventListener('input', calculateTotals);
+            });
+        }
+
+        // Calculate Totals
+        function calculateTotals() {
+            // Calculate Total Income
+            const incomeAmounts = document.querySelectorAll('.income-amount');
+            const totalIncome = Array.from(incomeAmounts)
+                .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+        
+            // Calculate Total Expenses
+            const expenseAmounts = document.querySelectorAll('.expense-amount');
+            const totalExpenses = Array.from(expenseAmounts)
+                .reduce((sum, input) => sum + (parseFloat(input.value) || 0), 0);
+        
+            // Monthly Calculations
+            const monthlySurplus = totalIncome - totalExpenses;
+        
+            // Update Total Income
+            totalIncomeElement.textContent = `$${totalIncome.toFixed(2)}`;
+            totalExpensesElement.textContent = `$${totalExpenses.toFixed(2)}`;
+        
+            // Monthly Surplus
+            monthlySurplusElement.textContent = `$${monthlySurplus.toFixed(2)}`;
+            monthlySurplusAlert.classList.remove('alert-success', 'alert-danger');
+            monthlySurplusAlert.classList.add(monthlySurplus >= 0 ? 'alert-success' : 'alert-danger');
+        
+            // Annual Calculations
+            const annualSurplus = monthlySurplus * 12;
+            annualSurplusElement.textContent = `$${annualSurplus.toFixed(2)}`;
+            annualSurplusAlert.classList.remove('alert-success', 'alert-danger');
+            annualSurplusAlert.classList.add(annualSurplus >= 0 ? 'alert-success' : 'alert-danger');
+        }
+
+        // Save Budget
+        saveButton.addEventListener('click', async () => {
+        // Validate form
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Collect Income Sources
+        const incomeSources = Array.from(document.querySelectorAll('.income-item'))
+            .map(item => ({
+                source: item.querySelector('.income-source').value,
+                amount: parseFloat(item.querySelector('.income-amount').value) || 0
+            })).filter(income => income.source && income.amount > 0);
+
+        // Collect Expense Categories
+        const expenseCategories = Array.from(document.querySelectorAll('.expense-item'))
+            .map(item => ({
+                category: item.querySelector('.expense-category').value,
+                amount: parseFloat(item.querySelector('.expense-amount').value) || 0
+            })).filter(expense => expense.category && expense.amount > 0);
+
+        // Prepare payload
+        const payload = {
+            name: document.getElementById('name').value,
+            year: document.getElementById('year').value,
+            income_sources: incomeSources,
+            expense_categories: expenseCategories,
+            total_monthly_income: parseFloat(totalIncomeElement.textContent.replace('$', '')),
+            total_monthly_expenses: parseFloat(totalExpensesElement.textContent.replace('$', '')),
+            monthly_surplus: parseFloat(monthlySurplusElement.textContent.replace('$', '')),
+            annual_surplus: parseFloat(annualSurplusElement.textContent.replace('$', '')),
+            notes: document.querySelector('textarea').value
+        };
+
+        try {
+            const response = await fetch('save_annual_budget/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                alert('Budget saved successfully!');
+            } else {
+                const errorData = await response.json();
+                alert(`Error: ${errorData.message}`);
+            }
+        } catch (error) {
+            console.error('Error saving budget:', error);
+            alert('Failed to save budget. Please try again.');
+        }
+    });
+
+    // Clear Form
+    clearButton.addEventListener('click', () => {
+        // Reset income sources
+        const initialIncomeItem = incomeContainer.querySelector('.income-item');
+        incomeContainer.innerHTML = '';
+        incomeContainer.appendChild(initialIncomeItem);
+        
+        // Reset expense categories
+        const initialExpenseItem = expenseContainer.querySelector('.expense-item');
+        expenseContainer.innerHTML = '';
+        expenseContainer.appendChild(initialExpenseItem);
+        
+        // Reset form fields
+        form.reset();
+        
+        // Recalculate totals
+        calculateTotals();
+    });  
+
+    // Initial setup
+    attachCalculationListeners();
+    }
+    attachAnnualEventListener();
+    })();
+</script>
 </body>
 </html>

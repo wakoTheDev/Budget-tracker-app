@@ -5,8 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Wallet Management System</title>
+    
     <!-- Bootstrap CSS -->
-    <link href="{%static 'assets/css/bootstrap.min.css'%}" rel="stylesheet">
+    <link href="{% static 'assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
     <style>
         .wallet-card {
             cursor: pointer;
@@ -23,11 +26,73 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4">My Accounts</h2>
-        
-        <div id="walletsContainer" class="row">
-            <!-- Wallets will be dynamically loaded here -->
-             <button class="btn btn-sucess">refresh</button>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Accounts</h2>
+            <div>
+                <button class="btn btn-success me-2" id="refreshButton">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#accountModal">
+                    <i class="fas fa-plus"></i> Add Account
+                </button>
+            </div>
+        </div>
+          
+        <div id="walletsContainer" class="row mt-2">
+            <!-- Accounts will be dynamically loaded here -->
+            <div class="col-12 text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading accounts...</p>
+            </div>
+        </div>
+
+        <!-- Account Creation Modal -->
+        <div class="modal fade" id="accountModal" tabindex="-1" aria-labelledby="accountModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="accountModalLabel">Create Your Account</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <!-- Account Creation Form -->
+                        <form id="create-account-form">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="FullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="FullName" name="full_name" required placeholder="Enter account name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="account_name" class="form-label">Account Name</label>
+                                <input type="text" class="form-control" id="account_name" name="account_name" required placeholder="Enter account name">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">email</label>
+                                <input type="text" class="form-control" id="email" name="email" required placeholder="Email">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Account Type</label>
+                                <select class="form-select" id="accountType" name="account_type" required>
+                                    <option value="" disabled selected>Select your account type</option>
+                                    <option value="phone">Phone Number</option>
+                                    <option value="bank">Bank Account</option>
+                                    <option value="credit_card">Credit Card</option>
+                                    <option value="crypto_wallet">Crypto Wallet</option>
+                                </select>
+                            </div>
+
+                            <div id="accountDetailsContainer"></div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Create Account</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Wallet Details Modal -->
@@ -35,30 +100,17 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Wallet Details</h5>
+                        <h5 class="modal-title">Account Details</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <div class="card">
-                            <div class="card-header" id="walletTypeHeader"></div>
+                            <div class="card-header" id="accountTypeHeader"></div>
                             <div class="card-body">
-                                <h5 class="card-title" id="walletUsername"></h5>
-                                <div id="balanceSection" class="mt-3">
-                                    <form id="secretKeyForm">
-                                        <div class="mb-3">
-                                            <label class="form-label">Enter Secret Key to View Balance</label>
-                                            <input type="password" class="form-control" id="secretKeyInput" required>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary">Unlock Balance</button>
-                                    </form>
-                                    <div id="balanceDisplay" class="mt-3" style="display:none;">
-                                        <h4>Balance: <span id="balanceAmount" class="blur-balance">*****</span></h4>
-                                        <small class="text-muted">Balance is protected. Secret key required.</small>
-                                    </div>
-                                </div>
+                                <h5 class="card-title" id="accountName"></h5>
                                 <div class="mt-3">
-                                    <h6>Wallet Details</h6>
-                                    <p id="walletDetails"></p>
+                                    <h6>Account Details</h6>
+                                    <p id="accountDetails"></p>
                                 </div>
                             </div>
                         </div>
@@ -68,9 +120,294 @@
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="{%static 'assets/js/bootstrap.bundle.min.js'%}"></script>
-
-    <script src="{%static 'js/accounts.js'%}"></script>
+    <!-- Bootstrap and jQuery JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="{% static 'assets/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <script>
+    // Wrap everything in a function to avoid global scope pollution
+    (function() {
+        // Function to fetch and render accounts
+        function fetchAccounts() {
+            const walletsContainer = $('#walletsContainer');
+            walletsContainer.html(`
+                <div class="col-12 text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading accounts...</p>
+                </div>
+            `);
+    
+            $.ajax({
+                url: '{% url "get_accounts" %}',
+                method: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.accounts && response.accounts.length > 0) {
+                        renderWallets(response.accounts);
+                    } else {
+                        walletsContainer.html(`
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    ${response.status || 'Unable to load accounts'}
+                                </div>
+                            </div>
+                        `);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    walletsContainer.html(`
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                Unable to load accounts. Please try again later.
+                                <br>Error: ${error}
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+        }
+    
+        // Render wallet cards
+        function renderWallets(accounts) {
+            const walletsContainer = $('#walletsContainer');
+            walletsContainer.empty();
+    
+            if (accounts.length === 0) {
+                walletsContainer.html(`
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            No accounts found. Click "Add Account" to get started.
+                        </div>
+                    </div>
+                `);
+                return;
+            }
+    
+            accounts.forEach(account => {
+                const walletCard = `
+                    <div class="col-md-4 mb-3">
+                        <div class="card wallet-card" data-account-id="${account.id}">
+                            <div class="card-body">
+                                <h5 class="card-title">${account.account_type.replace('_', ' ').toUpperCase()}</h5>
+                                <p class="card-text">Account Name: ${account.account_name}</p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <button class="btn btn-sm btn-danger delete-account" data-id="${account.id}">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                                <button class="btn btn-sm btn-primary view-details" data-id="${account.id}">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                walletsContainer.append(walletCard);
+            });
+    
+            // Attach event listeners after rendering
+            attachAccountEventListeners();
+        }
+    
+        // Attach event listeners to account cards
+        function attachAccountEventListeners() {
+            // View account details
+            $(document).on('click', '.view-details', function() {
+                const accountId = $(this).data('id');
+                $.ajax({
+                    url: '{% url "get_accounts" %}',
+                    method: 'GET',
+                    data: { account_id: accountId },
+                    dataType: 'json',
+                    success: function(response) {
+                        console.log('Full response:', response);
+        
+                        if (response.accounts && Array.isArray(response.accounts)) {
+                            const account = response.accounts.find(acc => acc.id == accountId);
+        
+                            if (account) {
+                                const formattedAccountType = account.account_type
+                                    .replace('_', ' ')
+                                    .toUpperCase();
+        
+                                let additionalDetails = 'No additional details available';
+                                switch(account.account_type) {
+                                    case 'phone':
+                                        additionalDetails = `Phone Number: ${account.phone_number || 'N/A'}`;
+                                        break;
+                                    case 'bank':
+                                        additionalDetails = `
+                                            Bank Name: ${account.bank_name || 'N/A'}<br>
+                                            Account Number: ${account.bank_account || 'N/A'}
+                                        `;
+                                        break;
+                                    case 'credit_card':
+                                        additionalDetails = `
+                                            Card Number: ${account.credit_card_number || 'N/A'}<br>
+                                            Expiry: ${account.credit_card_expiry || 'N/A'}
+                                        `;
+                                        break;
+                                    case 'crypto_wallet':
+                                        additionalDetails = `
+                                            Wallet Address: ${account.crypto_wallet_address || 'N/A'}
+                                        `;
+                                        break;
+                                }
+        
+                                $('#accountTypeHeader').text(formattedAccountType);
+                                $('#accountName').text(account.account_name || 'Unnamed Account');
+                                $('#accountDetails').html(`
+                                    <strong>Account Type:</strong> ${formattedAccountType}<br>
+                                    <strong>Additional Details:</strong><br>
+                                    ${additionalDetails}
+                                `);
+        
+                                // Ensure Bootstrap modal is properly initialized
+                                var walletDetailsModal = new bootstrap.Modal(document.getElementById('walletDetailsModal'));
+                                walletDetailsModal.show();
+                            } else {
+                                console.error('No account found with ID:', accountId);
+                                alert('Account details not found');
+                            }
+                        } else {
+                            console.error('Invalid response structure:', response);
+                            alert('Failed to fetch account details');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('AJAX Error:', error);
+                        alert('Unable to retrieve account details');
+                    }
+                });
+            });
+    
+            // Delete account
+            $(document).on('click', '.delete-account', function() {
+                const accountId = $(this).data('id');
+                if (confirm('Are you sure you want to delete this account?')) {
+                    $.ajax({
+                        url: '{% url "delete_account" %}',
+                        method: 'POST',
+                        data: {
+                            'account_id': accountId,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                console.log('within the success block')
+                                fetchAccounts(); 
+                            } else {
+                                console.log(response)
+                                alert(response.message || 'Failed to delete account');
+                            }
+                        },
+                        error: function() {
+                            alert('Unable to delete account');
+                        }
+                    });
+                }
+            });
+        }
+    
+        // Dynamic account type details
+        function updateAccountTypeDetails() {
+            const accountType = $('#accountType').val();
+            const container = $('#accountDetailsContainer');
+            container.empty();
+    
+            const accountTypeTemplates = {
+                'phone': `
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" name="phone_number" required placeholder="Enter your phone number">
+                    </div>
+                `,
+                'bank': `
+                    <div class="mb-3">
+                        <label for="bankAccount" class="form-label">Bank Account Number</label>
+                        <input type="text" class="form-control" id="bankAccount" name="bank_account" required placeholder="Enter your bank account number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="bankName" class="form-label">Bank Name</label>
+                        <input type="text" class="form-control" id="bankName" name="bank_name" required placeholder="Enter your bank name">
+                    </div>
+                `,
+                'credit_card': `
+                    <div class="mb-3">
+                        <label for="creditCardNumber" class="form-label">Credit Card Number</label>
+                        <input type="text" class="form-control" id="creditCardNumber" name="credit_card_number" required placeholder="Enter your credit card number">
+                    </div>
+                    <div class="mb-3">
+                        <label for="creditCardCvc" class="form-label">CVC</label>
+                        <input type="number" class="form-control" id="creditCardCvc" name="credit_card_cvc" required>
+                    </div>
+                
+                    <div class="mb-3">
+                        <label for="creditCardExpiry" class="form-label">Expiry Date</label>
+                        <input type="month" class="form-control" id="creditCardExpiry" name="credit_card_expiry" required>
+                    </div>
+                `,
+                'crypto_wallet': `
+                    <div class="mb-3">
+                        <label for="cryptoWalletAddress" class="form-label">Crypto Wallet Address</label>
+                        <input type="text" class="form-control" id="cryptoWalletAddress" name="crypto_wallet_address" required placeholder="Enter your crypto wallet address">
+                    </div>
+                `
+            };
+    
+            if (accountTypeTemplates[accountType]) {
+                container.html(accountTypeTemplates[accountType]);
+            }
+        }
+    
+        // Create account form submission
+        function setupCreateAccountForm() {
+            $('#create-account-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                $.ajax({
+                    url: '{% url "create_account" %}',
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            $('#accountModal').modal('hide');
+                            fetchAccounts();  // Refresh accounts list
+                            // Reset the form
+                            $('#create-account-form')[0].reset();
+                            $('#accountDetailsContainer').empty();
+                            alert(response.message || 'Account created successfully');
+                        } else {
+                            alert(response.message || 'Failed to create account');
+                        }
+                    },
+                    error: function() {
+                        alert('Unable to create account. Please try again.');
+                    }
+                });
+            });
+        }
+    
+        // Initialize page
+        function initPage() {
+            // Fetch accounts when page loads
+            fetchAccounts();
+    
+            // Event listeners
+            $('#accountType').on('change', updateAccountTypeDetails);
+            $('#refreshButton').on('click', fetchAccounts);
+    
+            // Setup form submission
+            setupCreateAccountForm();
+        }
+    
+        // Run initialization when document is ready
+        $(document).ready(initPage);
+    })();
+    </script> 
 </body>
 </html>

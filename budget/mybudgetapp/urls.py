@@ -18,4 +18,13 @@ urlpatterns = [
     path('update_schedule/<uuid:schedule_id>/', views.update_schedule, name='update_schedule'),
     path('back_to_schedule',views.back_to_schedule,name="back_to_schedule"),
     path('api/upcoming-schedules/', views.get_upcoming_schedules, name='upcoming-schedules'),
+    path('create-account', views.create_account, name='create_account'),
+    path('get-accounts/', views.get_accounts, name='get_accounts'),
+    path('delete_account', views.delete_account, name='delete_account'),
+    path('create_weekly_budget',views.create_weekly_budget,name='create_weekly_budget'),
+    path('create_daily_budget/', views.create_daily_budget, name='create_daily_budget'),  
+    path('create_monthly_budget/', views.create_monthly_budget, name='create_monthly_budget'),  
+    path('save_annual_budget/', views.save_annual_budget, name='save_annual_budget'),  
+    path('get-income-sources/', views.get_income_sources, name='income_sources'),
+    path('get-expense-categories/', views.get_expense_categories, name='expense_categories'),  
 ]

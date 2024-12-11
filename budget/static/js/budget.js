@@ -1,5 +1,5 @@
  // Enhanced Dynamic Content Loader 
- const mymenuItems = document.querySelectorAll("#choices li"); 
+ const myMenuItems = document.querySelectorAll("#choices li"); 
  const mycontentDiv = document.getElementById("content-div"); 
  function executeScripts(content) { 
     // Create a temporary div to parse the content 
@@ -38,7 +38,7 @@
                         console.error('Content loading error:', error); }); 
                     }
                      // Attach event listeners to menu items 
-                     mymenuItems.forEach((item )=> {
+                     myMenuItems.forEach((item )=> {
                          item.addEventListener("click", () => { 
                             const page = item.getAttribute("data-page");
                             console.log("Menu item clicked:", page); 

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6cf7;
+            --secondary-color: #6b7280;
+            --light-color: #f4f5f7;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #121212;
+            line-height: 1.7;
+            background-color: var(--light-color);
+        }
+
+        .hero-section {
+            position: relative;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6a11cb 100%);
+            color: white;
+            overflow: hidden;
+            padding: 150px 0 100px;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at top left, rgba(255,255,255,0.2) 0%, transparent 50%),
+                radial-gradient(circle at bottom right, rgba(255,255,255,0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+        }
+
+        .feature-section {
+            padding: 80px 0;
+            background-color: white;
+        }
+
+        .feature-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            color: var(--primary-color);
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: rotate(15deg);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #3a54c9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(74,108,247,0.4);
+        }
+
+        .navbar {
+            background-color: rgba(255,255,255,0.95);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            padding: 15px 0;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #6a11cb 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .footer {
+            background-color: #121212;
+            color: #f4f5f7;
+            padding: 60px 0 30px;
+        }
+
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 100px 0 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <span class="fw-bold text-primary">Budget App</span>
+            </a>
+            <div class="d-flex align-items-center">
+                <a href="{% url 'login'%}" class="btn btn-outline-secondary me-3">Login</a>
+                <a href="{%url 'register'%}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero-section" >
+        <div class="container hero-content d-flex justify-content-center align-items-center">
+            <div class="row align-items-center ">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <h1 class="display-4 fw-bold mb-4">Manage Your Money Smarter</h1>
+                    <p class="lead mb-5">FinTrack helps you track expenses, set budgets, and achieve your financial goals with ease and precision.</p>
+                    <div class="d-flex justify-content-center justify-content-lg-start">
+                        <a href="{%url 'register'%}" class="btn btn-primary me-3">Get Started</a>
+                        <a href="#features" class="btn btn-outline-light">Learn More</a>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </header>
+
+    <!-- Features Section -->
+    <section class="feature-section" id="features">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="mb-3">Powerful Features to Control Your Finances</h2>
+                <p class="text-muted">Designed to make financial management simple and intuitive</p>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Comprehensive Analytics</h3>
+                        <p class="text-muted">Gain deep insights with interactive charts and detailed financial reports.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-piggy-bank"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Smart Savings Tracker</h3>
+                        <p class="text-muted">Set, monitor, and achieve your financial goals with personalized recommendations.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4 text-center">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Cross-Platform Access</h3>
+                        <p class="text-muted">Manage your finances seamlessly across desktop and mobile devices.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h2 class="display-5 mb-4">Take Control of Your Financial Future</h2>
+                    <p class="lead mb-5">Join thousands of users who have transformed their financial habits with BudgetApp.</p>
+                    <a href="{%url 'register'%}" class="btn btn-light btn-lg px-5">Start Your Journey</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">BudgetApp</h5>
+                    <p class="text-muted">Empowering financial freedom through intelligent budgeting and tracking.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-muted">Home</a></li>
+                        <li><a href="#features" class="text-muted">Features</a></li>
+                        <li><a href="{%url 'login'%}" class="text-muted">Login</a></li>
+                        <li><a href="{%url 'register'%}" class="text-muted">Sign Up</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="text-white mb-3">Connect With Us</h5>
+                    <div class="social-icons">
+                        <a href="#" class="text-muted me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-muted me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-muted"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="text-center">
+                <p class="text-muted">&copy; 2024 budgetapp. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
